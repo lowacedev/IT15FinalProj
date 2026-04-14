@@ -1,0 +1,100 @@
+@model ITSMS.Models.Feedback
+
+@{
+    ViewData["Title"] = "Provide Feedback";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Service Feedback</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Thank you for using our service. Your feedback helps us improve.</p>
+
+                    <form method="post" asp-action="Create">
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.Any(v => v.Errors.Any()))
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                @foreach (var modelState in ViewData.ModelState.Values)
+                                {
+                                    @foreach (var error in modelState.Errors)
+                                    {
+                                        <p>@error.ErrorMessage</p>
+                                    }
+                                }
+                            </div>
+                        }
+
+                        <input type="hidden" name="RequestId" value="@Model.RequestId" />
+
+                        <div class="mb-4">
+                            <label class="form-label">Rating *</label>
+                            <div class="rating-stars">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <label class="star-label">
+                                        <input type="radio" name="Rating" value="@i" class="form-check-input" 
+                                               required style="display: none;" />
+                                        <i class="bi bi-star-fill" style="font-size: 2rem; cursor: pointer; color: #ddd;"></i>
+                                    </label>
+                                }
+                            </div>
+                            <small class="form-text text-muted d-block mt-2">Click on the stars to rate (1 = Poor, 5 = Excellent)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="comments" class="form-label">Comments (Optional)</label>
+                            <textarea id="comments" name="Comments" class="form-control" 
+                                      rows="5" placeholder="Share your experience..."></textarea>
+                            <small class="form-text text-muted">Maximum 1000 characters</small>
+                        </div>
+
+                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
+                            <a href="@Url.Action("Details", "ServiceRequests", new { id = Model.RequestId })" 
+                               class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Star rating functionality
+    document.querySelectorAll('.star-label').forEach(label => {
+        label.addEventListener('click', function() {
+            const starsContainer = this.closest('.rating-stars');
+            const radio = this.querySelector('input[type="radio"]');
+            const rating = radio.value;
+
+            // Update star colors
+            starsContainer.querySelectorAll('.star-label i').forEach((star, index) => {
+                if (index < rating) {
+                    star.style.color = '#ffc107';
+                } else {
+                    star.style.color = '#ddd';
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .rating-stars {
+        display: flex;
+        gap: 10px;
+    }
+
+    .star-label i {
+        transition: color 0.2s;
+    }
+
+    .star-label i:hover {
+        color: #ffc107 !important;
+    }
+</style>

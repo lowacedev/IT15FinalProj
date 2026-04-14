@@ -1,0 +1,131 @@
+@model List<ITSMS.Models.ServiceRequest>
+
+@{
+    ViewData["Title"] = "Service Requests";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Service Requests</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            @if (User.IsInRole("Admin") || User.IsInRole("Client"))
+            {
+                <a href="@Url.Action("Create", "ServiceRequests")" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> New Request
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <p>No service requests found.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Request #</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Requestor</th>
+                        <th>Assigned To</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@request.RequestNumber</strong>
+                            </td>
+                            <td>@request.Title</td>
+                            <td>
+                                <span class="badge bg-info">@request.Category?.CategoryName</span>
+                            </td>
+                            <td>
+                                @{
+                                    var statusClass = request.Status switch
+                                    {
+                                        ITSMS.Models.ServiceRequestStatus.Open => "bg-primary",
+                                        ITSMS.Models.ServiceRequestStatus.InProgress => "bg-warning text-dark",
+                                        ITSMS.Models.ServiceRequestStatus.OnHold => "bg-secondary",
+                                        ITSMS.Models.ServiceRequestStatus.Resolved => "bg-success",
+                                        ITSMS.Models.ServiceRequestStatus.Closed => "bg-dark",
+                                        _ => "bg-light text-dark"
+                                    };
+                                }
+                                <span class="badge @statusClass">@request.Status</span>
+                            </td>
+                            <td>
+                                @{
+                                    var priorityClass = request.Priority switch
+                                    {
+                                        ITSMS.Models.ServiceRequestPriority.Low => "bg-success",
+                                        ITSMS.Models.ServiceRequestPriority.Medium => "bg-info",
+                                        ITSMS.Models.ServiceRequestPriority.High => "bg-warning text-dark",
+                                        ITSMS.Models.ServiceRequestPriority.Critical => "bg-danger",
+                                        _ => "bg-light text-dark"
+                                    };
+                                }
+                                <span class="badge @priorityClass">@request.Priority</span>
+                            </td>
+                            <td>@request.Requestor?.FullName</td>
+                            <td>
+                                @if (request.AssignedTechnician != null)
+                                {
+                                    <span>@request.AssignedTechnician.FullName</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Unassigned</span>
+                                }
+                            </td>
+                            <td>
+                                <small>@request.CreatedAt.ToString("MM/dd/yyyy")</small>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Details", "ServiceRequests", new { id = request.RequestId })" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                                @if ((User.IsInRole("Admin") || User.IsInRole("Technician")) && 
+                                     request.Status != ITSMS.Models.ServiceRequestStatus.Closed)
+                                {
+                                    <a href="@Url.Action("Edit", "ServiceRequests", new { id = request.RequestId })" 
+                                       class="btn btn-sm btn-outline-warning">
+                                        Edit
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>

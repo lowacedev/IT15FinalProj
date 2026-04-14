@@ -1,0 +1,95 @@
+@model ITSMS.Models.ServiceRequest
+
+@{
+    ViewData["Title"] = $"Edit - {Model.RequestNumber}";
+    var categories = ViewData["Categories"] as List<ITSMS.Models.Category>;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3>Edit Service Request - @Model.RequestNumber</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="Edit" asp-route-id="@Model.RequestId">
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.Any(v => v.Errors.Any()))
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                @foreach (var modelState in ViewData.ModelState.Values)
+                                {
+                                    @foreach (var error in modelState.Errors)
+                                    {
+                                        <p>@error.ErrorMessage</p>
+                                    }
+                                }
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" id="title" name="Title" class="form-control" 
+                                   value="@Model.Title" required maxlength="150" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="categoryId" class="form-label">Category</label>
+                            <select id="categoryId" name="CategoryId" class="form-select" disabled>
+                                @if (categories != null)
+                                {
+                                    @foreach (var category in categories)
+                                    {
+                                        <option value="@category.CategoryId" 
+                                                selected="@(category.CategoryId == Model.CategoryId)">
+                                            @category.CategoryName
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <input type="hidden" name="CategoryId" value="@Model.CategoryId" />
+                            <small class="form-text text-muted">Category cannot be changed</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea id="description" name="Description" class="form-control" 
+                                      rows="6" required>@Model.Description</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select id="status" name="Status" class="form-select" required>
+                                    <option value="1" selected="@(Model.Status == ITSMS.Models.ServiceRequestStatus.Open)">Open</option>
+                                    <option value="2" selected="@(Model.Status == ITSMS.Models.ServiceRequestStatus.InProgress)">In Progress</option>
+                                    <option value="3" selected="@(Model.Status == ITSMS.Models.ServiceRequestStatus.OnHold)">On Hold</option>
+                                    <option value="4" selected="@(Model.Status == ITSMS.Models.ServiceRequestStatus.Resolved)">Resolved</option>
+                                    <option value="5" selected="@(Model.Status == ITSMS.Models.ServiceRequestStatus.Closed)">Closed</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="priority" class="form-label">Priority</label>
+                                <select id="priority" name="Priority" class="form-select" required>
+                                    <option value="1" selected="@(Model.Priority == ITSMS.Models.ServiceRequestPriority.Low)">Low</option>
+                                    <option value="2" selected="@(Model.Priority == ITSMS.Models.ServiceRequestPriority.Medium)">Medium</option>
+                                    <option value="3" selected="@(Model.Priority == ITSMS.Models.ServiceRequestPriority.High)">High</option>
+                                    <option value="4" selected="@(Model.Priority == ITSMS.Models.ServiceRequestPriority.Critical)">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
+                            <a href="@Url.Action("Details", "ServiceRequests", new { id = Model.RequestId })" 
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-warning">Update Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

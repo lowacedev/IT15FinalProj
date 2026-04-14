@@ -1,0 +1,87 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ITSMS.Models
+{
+    /// <summary>
+    /// ServiceRequest entity - Main ticketing system for service requests
+    /// </summary>
+    public class ServiceRequest
+    {
+        [Key]
+        public int RequestId { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string RequestNumber { get; set; } // e.g., REQ-001, REQ-002
+
+        [Required]
+        [StringLength(150, MinimumLength = 5)]
+        public string Title { get; set; }
+
+        [Required]
+        [MinLength(10)]
+        public string Description { get; set; }
+
+        [Required]
+        public int CategoryId { get; set; }
+
+        [Required]
+        public int RequestorId { get; set; }
+
+        public int? AssignedTechnicianId { get; set; } // Nullable - assigned later
+
+        [Required]
+        public ServiceRequestStatus Status { get; set; } = ServiceRequestStatus.Open;
+
+        [Required]
+        public ServiceRequestPriority Priority { get; set; } = ServiceRequestPriority.Medium;
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? ResolvedAt { get; set; }
+
+        public DateTime? ClosedAt { get; set; }
+
+        // Navigation properties
+        [ForeignKey("CategoryId")]
+        public Category Category { get; set; }
+
+        [ForeignKey("RequestorId")]
+        public User Requestor { get; set; }
+
+        [ForeignKey("AssignedTechnicianId")]
+        public User AssignedTechnician { get; set; }
+
+        public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
+
+        public Feedback Feedback { get; set; }
+    }
+
+    /// <summary>
+    /// ENUM for Service Request Status
+    /// </summary>
+    public enum ServiceRequestStatus
+    {
+        Open = 1,
+        [Display(Name = "In Progress")]
+        InProgress = 2,
+        [Display(Name = "On Hold")]
+        OnHold = 3,
+        Resolved = 4,
+        Closed = 5
+    }
+
+    /// <summary>
+    /// ENUM for Service Request Priority
+    /// </summary>
+    public enum ServiceRequestPriority
+    {
+        Low = 1,
+        Medium = 2,
+        High = 3,
+        Critical = 4
+    }
+}

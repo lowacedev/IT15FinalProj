@@ -1,0 +1,217 @@
+@model ITSMS.Models.ServiceRequest
+
+@{
+    ViewData["Title"] = $"Service Request - {Model.RequestNumber}";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4>@Model.RequestNumber - @Model.Title</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong></p>
+                            @{
+                                var statusClass = Model.Status switch
+                                {
+                                    ITSMS.Models.ServiceRequestStatus.Open => "bg-primary",
+                                    ITSMS.Models.ServiceRequestStatus.InProgress => "bg-warning text-dark",
+                                    ITSMS.Models.ServiceRequestStatus.OnHold => "bg-secondary",
+                                    ITSMS.Models.ServiceRequestStatus.Resolved => "bg-success",
+                                    ITSMS.Models.ServiceRequestStatus.Closed => "bg-dark",
+                                    _ => "bg-light text-dark"
+                                };
+                            }
+                            <span class="badge @statusClass fs-6">@Model.Status</span>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Priority:</strong></p>
+                            @{
+                                var priorityClass = Model.Priority switch
+                                {
+                                    ITSMS.Models.ServiceRequestPriority.Low => "bg-success",
+                                    ITSMS.Models.ServiceRequestPriority.Medium => "bg-info",
+                                    ITSMS.Models.ServiceRequestPriority.High => "bg-warning text-dark",
+                                    ITSMS.Models.ServiceRequestPriority.Critical => "bg-danger",
+                                    _ => "bg-light text-dark"
+                                };
+                            }
+                            <span class="badge @priorityClass fs-6">@Model.Priority</span>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <p><strong>Category:</strong> <span class="badge bg-info">@Model.Category?.CategoryName</span></p>
+                    <p><strong>Requestor:</strong> @Model.Requestor?.FullName (@Model.Requestor?.Email)</p>
+                    <p><strong>Assigned To:</strong> 
+                        @if (Model.AssignedTechnician != null)
+                        {
+                            <span>@Model.AssignedTechnician.FullName</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not assigned</span>
+                        }
+                    </p>
+
+                    <hr>
+
+                    <h5>Description</h5>
+                    <div class="bg-light p-3 rounded">
+                        @Html.Raw(Model.Description.Replace("\n", "<br>"))
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Created:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</p>
+                        </div>
+                        <div class="col-md-6">
+                            @if (Model.ResolvedAt.HasValue)
+                            {
+                                <p><strong>Resolved:</strong> @Model.ResolvedAt?.ToString("MMM dd, yyyy hh:mm tt")</p>
+                            }
+                        </div>
+                    </div>
+
+                    @if (Model.ClosedAt.HasValue)
+                    {
+                        <p><strong>Closed:</strong> @Model.ClosedAt?.ToString("MMM dd, yyyy hh:mm tt")</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Assignments History -->
+            @if (Model.Assignments.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Assignment History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            @foreach (var assignment in Model.Assignments.OrderByDescending(a => a.AssignedAt))
+                            {
+                                <div class="timeline-item mb-3">
+                                    <div class="d-flex">
+                                        @if (assignment.IsActive)
+                                        {
+                                            <div class="badge bg-success align-self-start">Active</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="badge bg-secondary align-self-start">Inactive</div>
+                                        }
+                                    </div>
+                                    <p class="mt-2">
+                                        <strong>@assignment.Technician?.FullName</strong><br>
+                                        Assigned by @assignment.AssignedByUser?.FullName
+                                        on @assignment.AssignedAt.ToString("MMM dd, yyyy hh:mm tt")
+                                        @if (!string.IsNullOrEmpty(assignment.Notes))
+                                        {
+                                            <br><small>@assignment.Notes</small>
+                                        }
+                                    </p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Feedback -->
+            @if (Model.Feedback != null)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Customer Feedback</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <strong>Rating:</strong>
+                            @for (int i = 0; i < Model.Feedback.Rating; i++)
+                            {
+                                <i class="bi bi-star-fill text-warning"></i>
+                            }
+                            @for (int i = Model.Feedback.Rating; i < 5; i++)
+                            {
+                                <i class="bi bi-star text-muted"></i>
+                            }
+                            (@Model.Feedback.Rating/5)
+                        </p>
+                        @if (!string.IsNullOrEmpty(Model.Feedback.Comments))
+                        {
+                            <p><strong>Comments:</strong></p>
+                            <div class="bg-light p-3 rounded">
+                                @Html.Raw(Model.Feedback.Comments.Replace("\n", "<br>"))
+                            </div>
+                        }
+                        <p><small class="text-muted">Provided on @Model.Feedback.ProvidedAt.ToString("MMM dd, yyyy")</small></p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar Actions -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Actions</h5>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        @if (Model.Status != ITSMS.Models.ServiceRequestStatus.Closed)
+                        {
+                            <a href="@Url.Action("Edit", "ServiceRequests", new { id = Model.RequestId })" 
+                               class="btn btn-warning">Edit Request</a>
+                            <a href="@Url.Action("Assign", "Assignments", new { requestId = Model.RequestId })" 
+                               class="btn btn-info">Assign Technician</a>
+                        }
+                        @if (Model.Status != ITSMS.Models.ServiceRequestStatus.Open && Model.Status != ITSMS.Models.ServiceRequestStatus.Closed)
+                        {
+                            <a href="@Url.Action("Close", "ServiceRequests", new { id = Model.RequestId })" 
+                               class="btn btn-danger">Close Request</a>
+                        }
+                    }
+                    else if (User.IsInRole("Technician"))
+                    {
+                        @if (Model.Status != ITSMS.Models.ServiceRequestStatus.Closed)
+                        {
+                            <a href="@Url.Action("Edit", "ServiceRequests", new { id = Model.RequestId })" 
+                               class="btn btn-warning">Update Status</a>
+                        }
+                    }
+                    else if (User.IsInRole("Client"))
+                    {
+                        @if (Model.Status == ITSMS.Models.ServiceRequestStatus.Resolved || 
+                             Model.Status == ITSMS.Models.ServiceRequestStatus.Closed)
+                        {
+                            @if (Model.Feedback == null)
+                            {
+                                <a href="@Url.Action("Create", "Feedback", new { requestId = Model.RequestId })" 
+                                   class="btn btn-primary">Provide Feedback</a>
+                            }
+                        }
+                    }
+
+                    <a href="@Url.Action("Index", "ServiceRequests")" class="btn btn-outline-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline-item {
+        border-left: 3px solid #dee2e6;
+        padding-left: 15px;
+        margin-left: 10px;
+    }
+</style>
