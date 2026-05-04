@@ -1,0 +1,117 @@
+@model ITSMS.Models.ServiceRequest
+
+@{
+    ViewData["Title"] = "Assign Technician";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Assign Service Request</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Request Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted">Request #</label>
+                            <p class="mb-0"><strong>@Model.RequestId</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted">Title</label>
+                            <p class="mb-0"><strong>@Model.Title</strong></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted">Category</label>
+                            <p class="mb-0">@Model.Category?.CategoryName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted">Requestor</label>
+                            <p class="mb-0">@Model.Requestor?.FullName</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted">Priority</label>
+                            <p class="mb-0">
+                                @if (Model.Priority == ITSMS.Models.ServiceRequestPriority.Critical)
+                                {
+                                    <span class="badge bg-danger">Critical</span>
+                                }
+                                else if (Model.Priority == ITSMS.Models.ServiceRequestPriority.High)
+                                {
+                                    <span class="badge bg-warning">High</span>
+                                }
+                                else if (Model.Priority == ITSMS.Models.ServiceRequestPriority.Medium)
+                                {
+                                    <span class="badge bg-info">Medium</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Low</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted">Status</label>
+                            <p class="mb-0">
+                                <span class="badge bg-secondary">@Model.Status</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="text-muted">Description</label>
+                            <p class="mb-0">@Model.Description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Assign Technician</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="Assign" asp-route-id="@Model.RequestId">
+                        <div class="mb-3">
+                            <label for="technicianId" class="form-label">Select Technician</label>
+                            <select id="technicianId" name="technicianId" class="form-select" required>
+                                <option value="">-- Choose a technician --</option>
+                                @if (ViewData["Technicians"] is List<ITSMS.Models.User> technicians)
+                                {
+                                    @foreach (var tech in technicians)
+                                    {
+                                        <option value="@tech.UserId">@tech.FullName (@tech.Email)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Assignment Notes</label>
+                            <textarea id="notes" name="notes" class="form-control" rows="4" placeholder="Add any notes about this assignment..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-start">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Assign Request
+                            </button>
+                            <a href="@Url.Action("Details", "ServiceRequests", new { id = Model.RequestId })" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

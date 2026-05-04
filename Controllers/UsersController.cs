@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ITSMS.Data;
 using ITSMS.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace ITSMS.Controllers
 {
@@ -10,7 +11,7 @@ namespace ITSMS.Controllers
     /// Users Controller - User management (Admin only)
     /// Authorization: Admin only
     /// </summary>
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,7 +25,7 @@ namespace ITSMS.Controllers
 
         // GET: Users/Index
         [HttpGet]
-        public IActionResult Index(string roleFilter = null)
+        public IActionResult Index(string roleFilter = null, int page = 1, int pageSize = 10)
         {
             var users = _context.Users
                 .Include(u => u.Role)
@@ -33,7 +34,25 @@ namespace ITSMS.Controllers
             if (!string.IsNullOrEmpty(roleFilter))
                 users = users.Where(u => u.Role.RoleName == roleFilter);
 
-            var userList = users.OrderBy(u => u.FirstName).ToList();
+            // Get total count before pagination
+            var totalCount = users.Count();
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            // Ensure page is valid
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            // Apply pagination
+            var userList = users.OrderBy(u => u.FirstName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Pass pagination info via ViewBag
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.PageSize = pageSize;
             ViewData["RoleFilter"] = roleFilter;
             return View(userList);
         }
@@ -63,8 +82,27 @@ namespace ITSMS.Controllers
         // POST: Users/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(User user, string password)
+        public async Task<IActionResult> Create(User user, string password, string confirmPassword)
         {
+            // Clear model state for PasswordHash since we handle it separately
+            ModelState.Remove("PasswordHash");
+            ModelState.Remove("Role");
+
+            // Validate password
+            if (string.IsNullOrEmpty(password))
+            {
+                ModelState.AddModelError("password", "Password is required.");
+            }
+            else if (password.Length < 8)
+            {
+                ModelState.AddModelError("password", "Password must be at least 8 characters.");
+            }
+
+            if (password != confirmPassword)
+            {
+                ModelState.AddModelError("confirmPassword", "Passwords do not match.");
+            }
+
             if (_context.Users.Any(u => u.Username == user.Username || u.Email == user.Email))
             {
                 ModelState.AddModelError("", "Username or email already exists.");
@@ -139,15 +177,15 @@ namespace ITSMS.Controllers
             return View(user);
         }
 
-        // GET: Users/Deactivate/5
+        // GET: Users/DeactivateConfirm/5
         [HttpGet]
-        public IActionResult Deactivate(int id)
+        public IActionResult DeactivateConfirm(int id)
         {
             var user = _context.Users.FirstOrDefault(u => u.UserId == id);
             if (user == null)
                 return NotFound();
 
-            return View(user);
+            return View("Deactivate", user);
         }
 
         // POST: Users/Deactivate/5

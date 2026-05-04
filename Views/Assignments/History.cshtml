@@ -1,0 +1,194 @@
+@model List<ITSMS.Models.Assignment>
+
+@{
+    ViewData["Title"] = "Assignment History";
+    var request = ViewData["Request"] as ITSMS.Models.ServiceRequest;
+}
+
+<style>
+    .assignment-card {
+        border-left: 4px solid #667eea;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .assignment-card.active {
+        border-left-color: #10b981;
+        background: #f0fdf4;
+    }
+
+    .assignment-card.inactive {
+        border-left-color: #9ca3af;
+        background: #f9fafb;
+    }
+
+    .assignment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .technician-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .status-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.active {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.inactive {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .assignment-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+        color: #1f2937;
+        font-weight: 500;
+    }
+
+    .assignment-notes {
+        background: white;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        border-left: 2px solid #d1d5db;
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-style: italic;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 0;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, #667eea, #764ba2);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #9ca3af;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="bi bi-clock-history"></i> Assignment History
+            </h2>
+            @if (request != null)
+            {
+                <p class="text-muted">Request #@request.RequestNumber - @request.Title</p>
+            }
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+            <p>No assignment history available for this request.</p>
+        </div>
+    }
+    else
+    {
+        <div class="timeline">
+            @foreach (var item in Model)
+            {
+                <div class="assignment-card @(item.IsActive ? "active" : "inactive")">
+                    <div class="assignment-header">
+                        <div>
+                            <div class="technician-name">
+                                <i class="bi bi-person-badge"></i> @(item.Technician?.FullName ?? "Unknown Technician")
+                            </div>
+                        </div>
+                        <span class="status-badge @(item.IsActive ? "active" : "inactive")">
+                            @(item.IsActive ? "ACTIVE" : "INACTIVE")
+                        </span>
+                    </div>
+
+                    <div class="assignment-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Assigned Date</span>
+                            <span class="detail-value">@item.AssignedAt.ToString("MMM dd, yyyy")</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Assigned Time</span>
+                            <span class="detail-value">@item.AssignedAt.ToString("hh:mm tt")</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Assigned By</span>
+                            <span class="detail-value">@(item.AssignedByUser?.FullName ?? "System")</span>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(item.Notes))
+                    {
+                        <div class="assignment-notes">
+                            <i class="bi bi-chat-left-text"></i> @item.Notes
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="javascript:history.back()" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+</div>

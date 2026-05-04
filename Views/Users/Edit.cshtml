@@ -1,0 +1,118 @@
+@model ITSMS.Models.User
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Edit User - @Model.FullName</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" asp-action="Edit" asp-route-id="@Model.UserId">
+                        <input type="hidden" asp-for="UserId" />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label">First Name</label>
+                                <input asp-for="FirstName" class="form-control" required />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label">Last Name</label>
+                                <input asp-for="LastName" class="form-control" required />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label">Email</label>
+                                <input asp-for="Email" type="email" class="form-control" required />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                                <input asp-for="PhoneNumber" class="form-control" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="RoleId" class="form-label">Role</label>
+                                <select asp-for="RoleId" class="form-select" required>
+                                    <option value="">-- Select a Role --</option>
+                                    @if (ViewData["Roles"] is List<ITSMS.Models.Role> roles)
+                                    {
+                                        @foreach (var role in roles)
+                                        {
+                                            <option value="@role.RoleId" selected="@(Model.RoleId == role.RoleId)">@role.RoleName</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="RoleId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong>Change Password (Optional)</strong>
+                            <p class="mb-0">Leave blank to keep the current password.</p>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input id="newPassword" name="newPassword" type="password" class="form-control" />
+                                <small class="text-muted">Leave blank to keep current password</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input id="confirmPassword" name="confirmPassword" type="password" class="form-control" />
+                            </div>
+                        </div>
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+                                <h6>Please fix the following errors:</h6>
+                                <ul>
+                                    @foreach (var modelState in ViewData.ModelState.Values)
+                                    {
+                                        @foreach (var error in modelState.Errors)
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Changes
+                                </button>
+                                <a href="@Url.Action("Details", "Users", new { id = Model.UserId })" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

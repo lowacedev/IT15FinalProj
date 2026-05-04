@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ITSMS.Data;
 using ITSMS.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ITSMS.Controllers
 {
@@ -21,7 +22,7 @@ namespace ITSMS.Controllers
 
         // GET: Feedback/Create/5
         [HttpGet]
-        [Authorize(Roles = "Client")]
+        [Authorize(Roles = "Employee")]
         public IActionResult Create(int requestId)
         {
             var request = _context.ServiceRequests
@@ -58,7 +59,7 @@ namespace ITSMS.Controllers
         // POST: Feedback/Create/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Client")]
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Create(Feedback feedback)
         {
             var userId = GetCurrentUserId();
@@ -73,6 +74,13 @@ namespace ITSMS.Controllers
             if (ModelState.IsValid)
             {
                 _context.Feedbacks.Add(feedback);
+                
+                // Auto-close the request when feedback is submitted
+                request.Status = ServiceRequestStatus.Closed;
+                request.ClosedAt = DateTime.UtcNow;
+                request.UpdatedAt = DateTime.UtcNow;
+                _context.ServiceRequests.Update(request);
+                
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Thank you for your feedback!";
@@ -84,7 +92,7 @@ namespace ITSMS.Controllers
 
         // GET: Feedback/Edit/5
         [HttpGet]
-        [Authorize(Roles = "Client")]
+        [Authorize(Roles = "Employee")]
         public IActionResult Edit(int id)
         {
             var feedback = _context.Feedbacks.FirstOrDefault(f => f.FeedbackId == id);
@@ -101,7 +109,7 @@ namespace ITSMS.Controllers
         // POST: Feedback/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Client")]
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Edit(int id, Feedback feedback)
         {
             if (id != feedback.FeedbackId)

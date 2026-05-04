@@ -1,0 +1,135 @@
+@{
+    ViewData["Title"] = "Technician Dashboard";
+    var pendingCount = ViewData["PendingCount"] != null ? (int)ViewData["PendingCount"] : 0;
+    var ongoingCount = ViewData["OngoingCount"] != null ? (int)ViewData["OngoingCount"] : 0;
+    var completedCount = ViewData["CompletedCount"] != null ? (int)ViewData["CompletedCount"] : 0;
+}
+
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="mb-2" style="color: #2c3e50;">
+                <i class="bi bi-speedometer2"></i> Technician Dashboard
+            </h2>
+            <p class="text-muted">Overview of your assigned tasks and service requests</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <!-- Pending Assigned Card -->
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-2">Pending Assigned</h6>
+                            <h3 class="mb-0" style="color: #ffc107;">@pendingCount</h3>
+                        </div>
+                        <div style="font-size: 2.5rem; color: #ffc107; opacity: 0.3;">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">New/Open requests assigned to you</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ongoing Tasks Card -->
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0d6efd;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-2">Ongoing Tasks</h6>
+                            <h3 class="mb-0" style="color: #0d6efd;">@ongoingCount</h3>
+                        </div>
+                        <div style="font-size: 2.5rem; color: #0d6efd; opacity: 0.3;">
+                            <i class="bi bi-play-circle"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Tasks currently in progress</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Tasks Card -->
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #198754;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-2">Completed Tasks</h6>
+                            <h3 class="mb-0" style="color: #198754;">@completedCount</h3>
+                        </div>
+                        <div style="font-size: 2.5rem; color: #198754; opacity: 0.3;">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Resolved or closed requests</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    @if (TempData["success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Quick Action Button -->
+    <div class="card border-0 shadow-sm bg-light">
+        <div class="card-body text-center py-4">
+            <a href="@Url.Action("Index", "ServiceRequests")" class="btn btn-primary btn-lg">
+                <i class="bi bi-list-task"></i> View All Assignments
+            </a>
+            <p class="text-muted mt-3 mb-0">
+                Go to the assignments page for a complete list and detailed management of all your service requests
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Stats Footer -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card bg-light border-0">
+                <div class="card-body small text-muted">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Dashboard Tips:</strong>
+                    Use this dashboard to get a quick overview of your workload. Click "View All Assignments" to see your complete task list, manage assignments, and update status on individual requests.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.35rem 0.65rem;
+    }
+
+    .btn-outline-primary:hover,
+    .btn-outline-success:hover {
+        transform: scale(1.05);
+        transition: all 0.2s;
+    }
+</style>

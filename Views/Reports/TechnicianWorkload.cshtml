@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "Technician Workload";
+}
+@using System.Dynamic
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Technician Workload Analysis</h2>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model == null || (Model as System.Collections.IEnumerable) == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            <p>No technician workload data available.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Technician</th>
+                        <th>Open Requests</th>
+                        <th>In Progress</th>
+                        <th>Resolved</th>
+                        <th>Total Assigned</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model is System.Collections.IEnumerable list)
+                    {
+                        @foreach (dynamic item in list)
+                        {
+                            var total = item.TotalAssigned;
+                            var workloadClass = total > 10 ? "danger" : (total > 5 ? "warning" : "success");
+
+                            <tr>
+                                <td><strong>@item.Technician</strong></td>
+                                <td>
+                                    <span class="badge bg-warning">@item.OpenRequests</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@item.InProgressRequests</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">@item.ResolvedRequests</span>
+                                </td>
+                                <td>
+                                    <strong>@item.TotalAssigned</strong>
+                                </td>
+                                <td>
+                                    @if (item.TotalAssigned == 0)
+                                    {
+                                        <span class="badge bg-secondary">Idle</span>
+                                    }
+                                    else if (item.TotalAssigned > 10)
+                                    {
+                                        <span class="badge bg-danger">Overloaded</span>
+                                    }
+                                    else if (item.TotalAssigned > 5)
+                                    {
+                                        <span class="badge bg-warning">Busy</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Available</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="@Url.Action("Dashboard", "Reports")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>

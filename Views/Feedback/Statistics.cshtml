@@ -1,0 +1,159 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "Feedback Statistics";
+    var feedbacks = Model as List<ITSMS.Models.Feedback>;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Feedback Statistics</h2>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (feedbacks == null || feedbacks.Count == 0)
+    {
+        <div class="alert alert-info">
+            <p>No feedback data available.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Feedback</h6>
+                        <h2 class="mb-0">@feedbacks.Count</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h6 class="card-title">Average Rating</h6>
+                        <h2 class="mb-0">@(feedbacks.Count > 0 ? Math.Round(feedbacks.Average(f => f.Rating), 2) : 0) ⭐</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h6 class="card-title">5-Star Ratings</h6>
+                        <h2 class="mb-0">@feedbacks.Count(f => f.Rating == 5)</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Rating Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            @for (int i = 5; i >= 1; i--)
+                            {
+                                var count = feedbacks.Count(f => f.Rating == i);
+                                var percentage = feedbacks.Count > 0 ? (count * 100 / feedbacks.Count) : 0;
+                                var starDisplay = new string('⭐', i);
+
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>@starDisplay</span>
+                                        <span class="badge bg-primary">@count feedback</span>
+                                    </div>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100">
+                                            @percentage%
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Satisfaction Level</h5>
+                    </div>
+                    <div class="card-body">
+                        @{
+                            var avgRating = feedbacks.Count > 0 ? Math.Round(feedbacks.Average(f => f.Rating), 2) : 0;
+                            var satisfactionText = avgRating >= 4.5 ? "Excellent" :
+                                                 (avgRating >= 4.0 ? "Very Good" :
+                                                 (avgRating >= 3.0 ? "Good" :
+                                                 (avgRating >= 2.0 ? "Fair" : "Poor")));
+                            var satisfactionColor = avgRating >= 4.5 ? "success" :
+                                                  (avgRating >= 4.0 ? "info" :
+                                                  (avgRating >= 3.0 ? "warning" : "danger"));
+                        }
+                        <div class="alert alert-@satisfactionColor">
+                            <h5>@satisfactionText</h5>
+                            <p class="mb-0">Average Rating: <strong>@avgRating</strong> out of 5</p>
+                        </div>
+
+                        <p class="text-muted">Based on @feedbacks.Count customer feedback submissions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Recent Feedback</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Request ID</th>
+                                        <th>Rating</th>
+                                        <th>Comment</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var feedback in feedbacks.Count > 0 ? feedbacks.OrderByDescending(f => f.ProvidedAt).Take(15) : new List<ITSMS.Models.Feedback>())
+                                    {
+                                        <tr>
+                                            <td>#@feedback.RequestId</td>
+                                            <td><span class="badge bg-success">@(new string('⭐', feedback.Rating))</span></td>
+                                            <td>@feedback.Comments</td>
+                                            <td>@(feedback.ProvidedAt != default ? feedback.ProvidedAt.ToString("MMM dd, yyyy") : "")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+</div>

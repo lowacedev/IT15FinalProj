@@ -1,0 +1,80 @@
+@model ITSMS.Models.Feedback
+
+@{
+    ViewData["Title"] = "Edit Feedback";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Edit Feedback</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" asp-action="Edit" asp-route-id="@Model.FeedbackId">
+                        <input type="hidden" asp-for="FeedbackId" />
+                        <input type="hidden" asp-for="RequestId" />
+                        <input type="hidden" asp-for="ProvidedBy" />
+                        <input type="hidden" asp-for="ProvidedAt" />
+
+                        <div class="mb-3">
+                            <label asp-for="Rating" class="form-label">Rating (1-5 Stars)</label>
+                            <select asp-for="Rating" class="form-select" required>
+                                <option value="">-- Select rating --</option>
+                                <option value="1" selected="@(Model.Rating == 1)">⭐ Poor</option>
+                                <option value="2" selected="@(Model.Rating == 2)">⭐⭐ Fair</option>
+                                <option value="3" selected="@(Model.Rating == 3)">⭐⭐⭐ Good</option>
+                                <option value="4" selected="@(Model.Rating == 4)">⭐⭐⭐⭐ Very Good</option>
+                                <option value="5" selected="@(Model.Rating == 5)">⭐⭐⭐⭐⭐ Excellent</option>
+                            </select>
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Comments" class="form-label">Comments</label>
+                            <textarea asp-for="Comments" class="form-control" rows="6" placeholder="Share your feedback..."></textarea>
+                            <span asp-validation-for="Comments" class="text-danger"></span>
+                        </div>
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+                                <h6>Please fix the following errors:</h6>
+                                <ul>
+                                    @foreach (var modelState in ViewData.ModelState.Values)
+                                    {
+                                        @foreach (var error in modelState.Errors)
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Changes
+                                </button>
+                                <a href="@Url.Action("Details", "ServiceRequests", new { id = Model.RequestId })" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

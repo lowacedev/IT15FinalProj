@@ -15,6 +15,7 @@
                     <p class="text-muted">Thank you for using our service. Your feedback helps us improve.</p>
 
                     <form method="post" asp-action="Create">
+                        @Html.AntiForgeryToken()
                         @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.Any(v => v.Errors.Any()))
                         {
                             <div class="alert alert-danger" role="alert">

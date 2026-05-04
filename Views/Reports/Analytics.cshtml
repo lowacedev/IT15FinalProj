@@ -1,0 +1,424 @@
+@model ReportsViewModel
+
+@{
+    ViewData["Title"] = "Analytics & Reports";
+}
+
+<style>
+    .reports-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    .reports-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .reports-header h1 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .reports-header p {
+        opacity: 0.95;
+        margin: 0;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .chart-header i {
+        font-size: 1.25rem;
+    }
+
+    .chart-body {
+        padding: 1.5rem;
+        position: relative;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 1rem;
+    }
+
+    .chart-legend {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+    }
+
+    .quick-links {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .quick-link-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        color: #667eea;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .quick-link-btn:hover {
+        border-color: #667eea;
+        background: #f8f6ff;
+        transform: translateY(-2px);
+    }
+
+    @@media (max-width: 768px) {
+        .reports-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .chart-container {
+            height: 250px;
+        }
+    }
+</style>
+
+<div class="reports-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="reports-header">
+            <h1>
+                <i class="bi bi-graph-up"></i> Analytics & Reports
+            </h1>
+            <p>Comprehensive system analytics, charts, and performance metrics</p>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Charts Section -->
+        <div class="row mb-4">
+            <!-- Priority Bar Chart -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="bi bi-bar-chart"></i> Requests by Priority
+                    </div>
+                    <div class="chart-body">
+                        <div class="chart-container">
+                            <canvas id="priorityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Pie Chart -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="bi bi-pie-chart"></i> Requests by Category
+                    </div>
+                    <div class="chart-body">
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ERP Analytics Section -->
+       
+        <div class="row mb-4">
+            <!-- Asset Status Pie Chart -->
+            <div class="col-lg-4 mb-4">
+                <div class="chart-card h-100">
+                    <div class="chart-header">
+                        <i class="bi bi-pc-display"></i> Asset Status Summary
+                    </div>
+                    <div class="chart-body">
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="assetStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requests Per Department Bar Chart -->
+            <div class="col-lg-8 mb-4">
+                <div class="chart-card h-100">
+                    <div class="chart-header">
+                        <i class="bi bi-building"></i> Requests by Department
+                    </div>
+                    <div class="chart-body">
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="deptRequestsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requests Per Asset Table -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="bi bi-wrench"></i> Top Assets Requiring Service
+                    </div>
+                    <div class="chart-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Asset Tag</th>
+                                        <th>Asset Name</th>
+                                        <th class="text-end">Number of Requests</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(var item in Model.RequestsPerAsset)
+                                    {
+                                        <tr>
+                                            <td><span class="badge bg-dark">@item.AssetTag</span></td>
+                                            <td class="fw-bold">@item.AssetName</td>
+                                            <td class="text-end">
+                                                <span class="badge bg-primary rounded-pill px-3 py-2">@item.RequestCount</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                    @if(!Model.RequestsPerAsset.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted py-3">No asset requests recorded yet.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="quick-links">
+                    <a href="@Url.Action("TechnicianPerformance", "Reports")" class="quick-link-btn">
+                        <i class="bi bi-people"></i>
+                        Technician Performance
+                    </a>
+                    <a href="@Url.Action("ServiceRequestsDetails", "Reports")" class="quick-link-btn">
+                        <i class="bi bi-list-check"></i>
+                        Detailed Requests
+                    </a>
+                    <a href="@Url.Action("CustomerSatisfaction", "Reports")" class="quick-link-btn">
+                        <i class="bi bi-star"></i>
+                        Satisfaction
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ===== PRIORITY BAR CHART =====
+        const priorityCtx = document.getElementById('priorityChart');
+        if (priorityCtx) {
+            const priorityLabels = [@for (int i = 0; i < Model.RequestsByPriority.Count; i++) { <text>'@Model.RequestsByPriority[i].Priority'@if (i < Model.RequestsByPriority.Count - 1) { <text>,</text> }</text> }];
+            const priorityCounts = [@for (int i = 0; i < Model.RequestsByPriority.Count; i++) { <text>@Model.RequestsByPriority[i].Count@if (i < Model.RequestsByPriority.Count - 1) { <text>,</text> }</text> }];
+            const priorityColors = [@for (int i = 0; i < Model.RequestsByPriority.Count; i++) { <text>'@Model.RequestsByPriority[i].Color'@if (i < Model.RequestsByPriority.Count - 1) { <text>,</text> }</text> }];
+
+            new Chart(priorityCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: priorityLabels,
+                    datasets: [{
+                        label: 'Number of Requests',
+                        data: priorityCounts,
+                        backgroundColor: priorityColors,
+                        borderColor: priorityColors,
+                        borderWidth: 1,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: '#e5e7eb'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== CATEGORY PIE CHART =====
+        const categoryCtx = document.getElementById('categoryChart');
+        if (categoryCtx) {
+            const categoryLabels = [@for (int i = 0; i < Model.RequestsByCategory.Count; i++) { <text>'@Model.RequestsByCategory[i].Category'@if (i < Model.RequestsByCategory.Count - 1) { <text>,</text> }</text> }];
+            const categoryCounts = [@for (int i = 0; i < Model.RequestsByCategory.Count; i++) { <text>@Model.RequestsByCategory[i].Count@if (i < Model.RequestsByCategory.Count - 1) { <text>,</text> }</text> }];
+            const categoryColors = [@for (int i = 0; i < Model.RequestsByCategory.Count; i++) { <text>'@Model.RequestsByCategory[i].Color'@if (i < Model.RequestsByCategory.Count - 1) { <text>,</text> }</text> }];
+
+            new Chart(categoryCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        data: categoryCounts,
+                        backgroundColor: categoryColors,
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        hoverBorderWidth: 3,
+                        hoverBorderColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                },
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== ASSET STATUS PIE CHART =====
+        const assetCtx = document.getElementById('assetStatusChart');
+        if (assetCtx && @(Model.AssetStatusSummary.Count > 0 ? "true" : "false")) {
+            const assetLabels = [@Html.Raw(string.Join(",", Model.AssetStatusSummary.Select(x => $"'{x.Status}'")))];
+            const assetCounts = [@string.Join(",", Model.AssetStatusSummary.Select(x => x.Count))];
+            const assetColors = [@Html.Raw(string.Join(",", Model.AssetStatusSummary.Select(x => $"'{x.Color}'")))];
+
+            new Chart(assetCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: assetLabels,
+                    datasets: [{
+                        data: assetCounts,
+                        backgroundColor: assetColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // ===== DEPARTMENT REQUESTS BAR CHART =====
+        const deptCtx = document.getElementById('deptRequestsChart');
+        if (deptCtx && @(Model.RequestsPerDepartment.Count > 0 ? "true" : "false")) {
+            const deptLabels = [@Html.Raw(string.Join(",", Model.RequestsPerDepartment.Select(x => $"'{x.DepartmentName}'")))];
+            const deptCounts = [@string.Join(",", Model.RequestsPerDepartment.Select(x => x.RequestCount))];
+
+            new Chart(deptCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: deptLabels,
+                    datasets: [{
+                        label: 'Service Requests',
+                        data: deptCounts,
+                        backgroundColor: '#667eea',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+    });
+</script>

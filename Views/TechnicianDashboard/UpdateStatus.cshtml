@@ -1,0 +1,172 @@
+@model ITSMS.Models.ServiceRequest
+
+@{
+    ViewData["Title"] = "Update Request Status";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Update Request Status
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Request Info -->
+                    <div class="alert alert-info" role="alert">
+                        <strong>Request:</strong> @Model.RequestNumber - @Model.Title
+                        <br />
+                        <strong>Current Status:</strong> 
+                        @{
+                            var currentStatusColor = Model.Status switch
+                            {
+                                ITSMS.Models.ServiceRequestStatus.Pending => "#ffc107",
+                                ITSMS.Models.ServiceRequestStatus.InProgress => "#0d6efd",
+                                ITSMS.Models.ServiceRequestStatus.OnHold => "#6c757d",
+                                ITSMS.Models.ServiceRequestStatus.Resolved => "#198754",
+                                ITSMS.Models.ServiceRequestStatus.Closed => "#28a745",
+                                _ => "#6c757d"
+                            };
+                            var currentStatusName = Model.Status switch
+                            {
+                                ITSMS.Models.ServiceRequestStatus.InProgress => "In Progress",
+                                ITSMS.Models.ServiceRequestStatus.OnHold => "On Hold",
+                                _ => Model.Status.ToString()
+                            };
+                        }
+                        <span class="badge" style="background-color: @currentStatusColor; color: @(Model.Status == ITSMS.Models.ServiceRequestStatus.Pending ? "black" : "white");">
+                            @currentStatusName
+                        </span>
+                    </div>
+
+                    <form method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select New Status:</label>
+                            <div class="status-options">
+                                <div class="form-check mb-3 p-3 border rounded" style="background-color: #fff3cd;">
+                                    <input class="form-check-input status-radio" type="radio" name="status" id="status_open" 
+                                           value="@ITSMS.Models.ServiceRequestStatus.Pending" 
+                                           @(Model.Status == ITSMS.Models.ServiceRequestStatus.Pending ? "checked disabled" : "") />
+                                    <label class="form-check-label" for="status_open">
+                                        <strong style="color: #ffc107;">⚪ Open</strong>
+                                        <br />
+                                        <small class="text-muted">Request is new/not yet started</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3 p-3 border rounded" style="background-color: #cfe2ff;">
+                                    <input class="form-check-input status-radio" type="radio" name="status" id="status_inprogress" 
+                                           value="@ITSMS.Models.ServiceRequestStatus.InProgress"
+                                           @(Model.Status == ITSMS.Models.ServiceRequestStatus.InProgress ? "checked" : "") />
+                                    <label class="form-check-label" for="status_inprogress">
+                                        <strong style="color: #0d6efd;">🔵 In Progress</strong>
+                                        <br />
+                                        <small class="text-muted">You are actively working on this request</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3 p-3 border rounded" style="background-color: #e7d4f5;">
+                                    <input class="form-check-input status-radio" type="radio" name="status" id="status_onhold" 
+                                           value="@ITSMS.Models.ServiceRequestStatus.OnHold"
+                                           @(Model.Status == ITSMS.Models.ServiceRequestStatus.OnHold ? "checked" : "") />
+                                    <label class="form-check-label" for="status_onhold">
+                                        <strong style="color: #6c757d;">⏸️ On Hold</strong>
+                                        <br />
+                                        <small class="text-muted">Work is paused pending additional information</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3 p-3 border rounded" style="background-color: #d1e7dd;">
+                                    <input class="form-check-input status-radio" type="radio" name="status" id="status_resolved" 
+                                           value="@ITSMS.Models.ServiceRequestStatus.Resolved"
+                                           @(Model.Status == ITSMS.Models.ServiceRequestStatus.Resolved ? "checked" : "") />
+                                    <label class="form-check-label" for="status_resolved">
+                                        <strong style="color: #198754;">✅ Resolved</strong>
+                                        <br />
+                                        <small class="text-muted">Issue has been resolved and ready for review</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3 p-3 border rounded" style="background-color: #d3d8dc;">
+                                    <input class="form-check-input status-radio" type="radio" name="status" id="status_closed" 
+                                           value="@ITSMS.Models.ServiceRequestStatus.Closed"
+                                           @(Model.Status == ITSMS.Models.ServiceRequestStatus.Closed ? "checked disabled" : "") />
+                                    <label class="form-check-label" for="status_closed">
+                                        <strong style="color: #28a745;">🔒 Closed</strong>
+                                        <br />
+                                        <small class="text-muted">Request is officially closed (admin only)</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Update Status
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary btn-lg">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Request Details Section -->
+            <div class="card mt-4 border-0 shadow">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Request Details</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Description:</strong>
+                            <p class="text-muted">@Model.Description</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Category:</strong>
+                            <p>@(Model.Category?.CategoryName ?? "N/A")</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Created At:</strong>
+                            <p class="text-muted">@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Last Updated:</strong>
+                            <p class="text-muted">@Model.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .status-options .form-check {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .status-options .form-check:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .status-options .form-check.active,
+    .status-options .form-check input:checked + label {
+        font-weight: 600;
+    }
+
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-top: 0.125rem;
+    }
+</style>

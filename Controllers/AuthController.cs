@@ -5,6 +5,7 @@ using System.Security.Claims;
 using ITSMS.Data;
 using ITSMS.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace ITSMS.Controllers
 {
@@ -27,6 +28,23 @@ namespace ITSMS.Controllers
         [HttpGet]
         public IActionResult Login(string returnUrl = null)
         {
+            // If user is already authenticated, redirect them to appropriate dashboard
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("Dashboard", "Reports");
+                }
+                else if (User.IsInRole("Technician"))
+                {
+                    return RedirectToAction("Index", "TechnicianDashboard");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "ServiceRequests");
+                }
+            }
+
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -43,9 +61,10 @@ namespace ITSMS.Controllers
             }
 
             var user = _context.Users
+                .Include(u => u.Role)
                 .FirstOrDefault(u => u.Username == username && u.IsActive);
 
-            if (user == null || !_passwordHasher.VerifyHashedPassword(user, user.PasswordHash).Equals(PasswordVerificationResult.Success))
+            if (user == null || !_passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password).Equals(PasswordVerificationResult.Success))
             {
                 ModelState.AddModelError("", "Invalid username or password.");
                 return View();
@@ -58,7 +77,7 @@ namespace ITSMS.Controllers
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim("FullName", user.FullName),
-                new Claim(ClaimTypes.Role, user.Role?.RoleName ?? "Client")
+                new Claim(ClaimTypes.Role, user.Role?.RoleName ?? "Employee")
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -108,13 +127,25 @@ namespace ITSMS.Controllers
                 FirstName = firstName,
                 LastName = lastName,
                 PhoneNumber = phoneNumber,
-                RoleId = 3, // Default: Client role
+                RoleId = 3, // Default: Employee role
                 IsActive = true
             };
 
             newUser.PasswordHash = _passwordHasher.HashPassword(newUser, password);
 
             _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            // Auto-create Employee record for the new user
+            var maxEmpId = await _context.Employees.MaxAsync(e => (int?)e.Id) ?? 0;
+            var employee = new Employee
+            {
+                UserId = newUser.UserId,
+                DepartmentId = 1, // Default to IT department
+                EmployeeCode = $"EMP-{(maxEmpId + 1):000}",
+                Status = EmployeeStatus.Active
+            };
+            _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Registration successful. Please login.";
@@ -126,7 +157,16 @@ namespace ITSMS.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
+            // Clear any persisted TempData from the session
+            TempData.Clear();
+            return RedirectToAction("Login");
+        }
+
+        // GET: Auth/AccessDenied
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View("~/Views/Shared/AccessDenied.cshtml");
         }
     }
 }

@@ -13,7 +13,6 @@ namespace ITSMS.Models
         public int FeedbackId { get; set; }
 
         [Required]
-        [Index(IsUnique = true)]
         public int RequestId { get; set; }
 
         [Required]
@@ -28,11 +27,11 @@ namespace ITSMS.Models
 
         public DateTime ProvidedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation properties
+        // Navigation properties (nullable to exclude from validation)
         [ForeignKey("RequestId")]
-        public ServiceRequest Request { get; set; }
+        public ServiceRequest? Request { get; set; }
 
         [ForeignKey("ProvidedBy")]
-        public User User { get; set; }
+        public User? User { get; set; }
     }
 }

@@ -1,0 +1,142 @@
+@model ITSMS.Models.User
+
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Add New User</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" asp-action="Create">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label">First Name</label>
+                                <input asp-for="FirstName" class="form-control" required />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label">Last Name</label>
+                                <input asp-for="LastName" class="form-control" required />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Username" class="form-label">Username</label>
+                                <input asp-for="Username" class="form-control" required />
+                                <span asp-validation-for="Username" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label">Email</label>
+                                <input asp-for="Email" type="email" class="form-control" required />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                                <input asp-for="PhoneNumber" class="form-control" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="RoleId" class="form-label">Role</label>
+                                <select asp-for="RoleId" class="form-select" required>
+                                    <option value=""> Select a Role</option>
+                                    @if (ViewData["Roles"] is List<ITSMS.Models.Role> roles)
+                                    {
+                                        @foreach (var role in roles)
+                                        {
+                                            <option value="@role.RoleId">@role.RoleName</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="RoleId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="password" class="form-label">Password</label>
+                                <input id="password" name="password" type="password" class="form-control" required minlength="8" />
+                                <small class="text-muted">Minimum 8 characters</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input id="confirmPassword" name="confirmPassword" type="password" class="form-control" required />
+                            </div>
+                        </div>
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+                                <h6>Please fix the following errors:</h6>
+                                <ul>
+                                    @foreach (var modelState in ViewData.ModelState.Values)
+                                    {
+                                        @foreach (var error in modelState.Errors)
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Create User
+                                </button>
+                                <a href="@Url.Action("Index", "Users")" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const form = document.querySelector('form');
+
+            function validatePasswords() {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    confirmPasswordInput.setCustomValidity("Passwords do not match");
+                } else {
+                    confirmPasswordInput.setCustomValidity("");
+                }
+            }
+
+            passwordInput.addEventListener('change', validatePasswords);
+            confirmPasswordInput.addEventListener('keyup', validatePasswords);
+
+            form.addEventListener('submit', function (e) {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    e.preventDefault();
+                    confirmPasswordInput.setCustomValidity("Passwords do not match");
+                    confirmPasswordInput.reportValidity();
+                }
+            });
+        });
+    </script>
+}

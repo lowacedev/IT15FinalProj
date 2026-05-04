@@ -1,0 +1,111 @@
+@model ITSMS.Models.User
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>User Details</h2>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">@Model.FullName</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted">First Name</label>
+                            <p class="mb-0"><strong>@Model.FirstName</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted">Last Name</label>
+                            <p class="mb-0"><strong>@Model.LastName</strong></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted">Username</label>
+                            <p class="mb-0"><strong>@Model.Username</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted">Email</label>
+                            <p class="mb-0"><strong>@Model.Email</strong></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted">Phone Number</label>
+                            <p class="mb-0"><strong>@Model.PhoneNumber</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted">Role</label>
+                            <p class="mb-0">
+                                <span class="badge bg-info">@Model.Role?.RoleName</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted">Status</label>
+                            <p class="mb-0">
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactive</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted">Created</label>
+                            <p class="mb-0"><strong>@Model.CreatedAt.ToString("MMM dd, yyyy")</strong></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="text-muted">Last Updated</label>
+                            <p class="mb-0"><strong>@Model.UpdatedAt.ToString("MMM dd, yyyy")</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="@Url.Action("Edit", "Users", new { id = Model.UserId })" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Edit User
+                    </a>
+                    @if (Model.IsActive)
+                    {
+                        <a href="@Url.Action("DeactivateConfirm", "Users", new { id = Model.UserId })" class="btn btn-danger">
+                            <i class="bi bi-lock"></i> Deactivate User
+                        </a>
+                    }
+                    <a href="@Url.Action("Index", "Users")" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

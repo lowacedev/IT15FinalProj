@@ -53,12 +53,12 @@ namespace ITSMS.Services
 
         public string HashPassword(string password)
         {
-            return _passwordHasher.HashPassword(password, password);
+            return _passwordHasher.HashPassword("user", password);
         }
 
         public bool VerifyPassword(string password, string hash)
         {
-            var result = _passwordHasher.VerifyHashedPassword(password, hash);
+            var result = _passwordHasher.VerifyHashedPassword("user", hash, password);
             return result == PasswordVerificationResult.Success;
         }
     }

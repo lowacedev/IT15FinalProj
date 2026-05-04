@@ -23,19 +23,19 @@ namespace ITSMS.Models
 
         [Required]
         [StringLength(255)]
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string LastName { get; set; }
+        public string LastName { get; set; } = string.Empty;
 
         [Phone]
         [StringLength(20)]
-        public string PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; } = string.Empty;
 
         [Required]
         public int RoleId { get; set; }
@@ -49,7 +49,7 @@ namespace ITSMS.Models
 
         // Navigation properties
         [ForeignKey("RoleId")]
-        public Role Role { get; set; }
+        public Role? Role { get; set; }
 
         public ICollection<ServiceRequest> RequestsCreated { get; set; } = new List<ServiceRequest>();
         
@@ -60,6 +60,9 @@ namespace ITSMS.Models
         public ICollection<Assignment> AssignmentsReceived { get; set; } = new List<Assignment>();
         
         public ICollection<Feedback> FeedbackProvided { get; set; } = new List<Feedback>();
+
+        // 1:1 relationship with Employee
+        public Employee? Employee { get; set; }
 
         // Helper property for display
         [NotMapped]

@@ -1,0 +1,793 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var dashboard = ViewData["Dashboard"] as dynamic;
+}
+
+<style>
+    .dashboard-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-header h1 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 2.5rem;
+    }
+
+    .dashboard-header p {
+        opacity: 0.95;
+        margin: 0;
+    }
+
+    .kpi-card {
+        background: white;
+        border: none;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .kpi-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .kpi-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .kpi-card[role="button"]:focus {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+
+    .kpi-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1;
+    }
+
+    .kpi-icon {
+        font-size: 2rem;
+        margin-bottom: 0.25rem;
+        opacity: 0.8;
+    }
+
+    .kpi-icon.primary { color: #667eea; }
+    .kpi-icon.warning { color: #f59e0b; }
+    .kpi-icon.info { color: #06b6d4; }
+    .kpi-icon.success { color: #10b981; }
+    .kpi-icon.danger { color: #ef4444; }
+
+    .kpi-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1;
+        text-align: right;
+        min-width: 80px;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-header i {
+        font-size: 1.25rem;
+    }
+
+    .section-body {
+        padding: 1.5rem;
+    }
+
+    .recent-table {
+        font-size: 0.9rem;
+    }
+
+    .recent-table th {
+        background: #f3f4f6;
+        font-weight: 600;
+        color: #374151;
+        border: none;
+    }
+
+    .recent-table td {
+        vertical-align: middle;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        font-weight: 600;
+    }
+
+    .priority-high { background: #fee2e2; color: #991b1b; }
+    .priority-medium { background: #fef3c7; color: #92400e; }
+    .priority-low { background: #dbeafe; color: #003da5; }
+    .priority-critical { background: #fecaca; color: #7f1d1d; }
+
+    .stat-open { color: #3b82f6; }
+    .stat-progress { color: #f59e0b; }
+    .stat-resolved { color: #10b981; }
+    .stat-closed { color: #6b7280; }
+
+    .quick-action-btn {
+        border-radius: 8px;
+        padding: 0.75rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-bottom: 0.75rem;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .tech-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.875rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .tech-item:last-child {
+        border-bottom: none;
+    }
+
+    .tech-name {
+        font-weight: 500;
+        color: #1f2937;
+    }
+
+    .tech-stats {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.875rem;
+    }
+
+    .stat-count {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.75rem;
+    }
+
+    .stat-number {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 1.125rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #9ca3af;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+        }
+
+        .kpi-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .kpi-value {
+            text-align: left;
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1><i class="bi bi-speedometer2"></i> Dashboard</h1>
+           
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- KPI Cards - First Row -->
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-icon primary"><i class="bi bi-ticket-detailed"></i></div>
+                        <div class="kpi-label">Total Requests</div>
+                    </div>
+                    <div class="kpi-value">@dashboard?.TotalRequests</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <button type="button" class="kpi-card" onclick="viewPendingRequests(); return false;" style="width: 100%; border: none; background: white; padding: 1.5rem;" title="View pending requests">
+                    <div class="kpi-content">
+                        <div class="kpi-icon warning"><i class="bi bi-hourglass-split"></i></div>
+                        <div class="kpi-label">Pending Requests</div>
+                    </div>
+                    <div class="kpi-value stat-open">@dashboard?.PendingRequests</div>
+                </button>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-icon info"><i class="bi bi-gear-fill"></i></div>
+                        <div class="kpi-label">In Progress</div>
+                    </div>
+                    <div class="kpi-value stat-progress">@dashboard?.InProgressRequests</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <button type="button" class="kpi-card" onclick="viewCriticalRequests(); return false;" style="width: 100%; border: none; background: white; padding: 1.5rem;" title="View critical requests">
+                    <div class="kpi-content">
+                        <div class="kpi-icon danger"><i class="bi bi-fire"></i></div>
+                        <div class="kpi-label">Critical Issues</div>
+                    </div>
+                    <div class="kpi-value">@dashboard?.CriticalRequests</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="row mb-4">
+            <!-- Recent Requests -->
+            <div class="col-lg-8 mb-4">
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="bi bi-clock-history"></i> Recent Requests
+                    </div>
+                    <div class="section-body">
+                        @if (dashboard?.RecentRequests != null && dashboard.RecentRequests.Count > 0)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover recent-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Request #</th>
+                                            <th>Title</th>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>Assigned To</th>
+                                            <th>Requestor</th>
+                                            <th>Date</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var request in dashboard.RecentRequests)
+                                        {
+                                            <tr>
+                                                <td><strong>@request.RequestNumber</strong></td>
+                                                <td>
+                                                    <span class="text-truncate" title="@request.Title">
+                                                        @request.Title.Substring(0, Math.Min(20, request.Title.Length))@(request.Title.Length > 20 ? "..." : "")
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        var priorityClass = request.Priority switch
+                                                        {
+                                                            ServiceRequestPriority.Critical => "priority-critical",
+                                                            ServiceRequestPriority.High => "priority-high",
+                                                            ServiceRequestPriority.Medium => "priority-medium",
+                                                            _ => "priority-low"
+                                                        };
+                                                    }
+                                                    <span class="badge status-badge @priorityClass">@request.Priority</span>
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        var statusClass = request.Status switch
+                                                        {
+                                                            ServiceRequestStatus.Pending => "bg-info",
+                                                            ServiceRequestStatus.InProgress => "bg-warning text-dark",
+                                                            ServiceRequestStatus.OnHold => "bg-secondary",
+                                                            ServiceRequestStatus.Resolved => "bg-success",
+                                                            ServiceRequestStatus.Closed => "bg-dark",
+                                                            _ => "bg-light text-dark"
+                                                        };
+                                                    }
+                                                    <span class="badge @statusClass">@request.Status</span>
+                                                </td>
+                                                <td>@(request.AssignedTechnician?.FullName ?? "Unassigned")</td>
+                                                <td>@request.Requestor?.FullName</td>
+                                                <td><small>@request.CreatedAt.ToString("MMM dd, yyyy")</small></td>
+                                                <td>
+                                                    <a href="@Url.Action("Details", "ServiceRequests", new { id = request.RequestId })" 
+                                                       class="btn btn-sm btn-outline-primary" title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <a href="@Url.Action("Index", "ServiceRequests")" class="btn btn-sm btn-outline-primary">
+                                    View All Requests
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="bi bi-inbox" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                                <p>No requests yet. Get started by creating a new service request.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar: Top Technicians & Quick Stats -->
+            <div class="col-lg-4 mb-4">
+                <!-- Top Technicians -->
+                <div class="section-card mb-4">
+                    <div class="section-header">
+                        <i class="bi bi-star-fill"></i> Top Technicians
+                    </div>
+                    <div class="section-body">
+                        @if (dashboard?.TopTechnicians != null && dashboard.TopTechnicians.Count > 0)
+                        {
+                            <div data-tech-container>
+                            @foreach (var tech in dashboard.TopTechnicians)
+                            {
+                                <div class="tech-item">
+                                    <div class="tech-name">@tech.Technician</div>
+                                    <div class="tech-stats">
+                                        <div class="stat-count">
+                                            <div class="stat-number">@tech.AssignedCount</div>
+                                            <div class="stat-label">Assigned</div>
+                                        </div>
+                                        <div class="stat-count">
+                                            <div class="stat-number">@tech.CompletedCount</div>
+                                            <div class="stat-label">Completed</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            </div>
+                         
+                        }
+                        else
+                        {
+                            <div class="empty-state" style="padding: 1rem;">
+                                <p>No technician data available.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    // Function to view pending requests
+    function viewPendingRequests() {
+        fetch('@Url.Action("GetPendingRequests", "Reports")')
+            .then(response => response.text())
+            .then(html => {
+                const modalBody = document.getElementById('pendingModalBody');
+                if (modalBody) {
+                    modalBody.innerHTML = html;
+                    const modal = new bootstrap.Modal(document.getElementById('pendingRequestsModal'));
+                    modal.show();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Function to view critical requests
+    function viewCriticalRequests() {
+        fetch('@Url.Action("GetCriticalRequests", "Reports")')
+            .then(response => response.text())
+            .then(html => {
+                const modalBody = document.getElementById('criticalModalBody');
+                if (modalBody) {
+                    modalBody.innerHTML = html;
+                    const modal = new bootstrap.Modal(document.getElementById('criticalRequestsModal'));
+                    modal.show();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Initialize animations
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.kpi-value').forEach((el, index) => {
+            el.style.animation = `fadeInUp 0.6s ease ${index * 0.1}s both`;
+        });
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @@keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+
+    // Function to assign technician
+    function assignTechnician(requestId) {
+        const technicianSelect = document.getElementById('technician-' + requestId);
+        const technicianId = technicianSelect.value;
+        
+        if (!technicianId) {
+            alert('Please select a technician');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('requestId', requestId);
+        formData.append('technicianId', technicianId);
+
+        fetch('@Url.Action("AssignTechnicianQuick", "Assignments")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>Assignment Successful!</strong><br/>
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                const container = document.querySelector('.dashboard-container');
+                const header = container.querySelector('.dashboard-header');
+                header.parentNode.insertBefore(alertDiv, header.nextSibling);
+                
+                // Close both modals after successful assignment
+                const pendingModalElement = document.getElementById('pendingRequestsModal');
+                const criticalModalElement = document.getElementById('criticalRequestsModal');
+                const pendingModal = bootstrap.Modal.getInstance(pendingModalElement);
+                const criticalModal = bootstrap.Modal.getInstance(criticalModalElement);
+                if (pendingModal) {
+                    setTimeout(() => {
+                        pendingModal.hide();
+                    }, 1500);
+                }
+                if (criticalModal) {
+                    setTimeout(() => {
+                        criticalModal.hide();
+                    }, 1500);
+                }
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error assigning technician');
+        });
+    }
+
+    // ==================== AUTO-REFRESH DASHBOARD ON CHANGES ====================
+    let autoRefreshInterval;
+    let lastDashboardData = null;
+
+    function hasDataChanged(newData) {
+        if (!lastDashboardData) return true;
+        
+        // Compare key metrics for changes
+        return newData.totalRequests !== lastDashboardData.totalRequests ||
+               newData.pendingRequests !== lastDashboardData.pendingRequests ||
+               newData.inProgressRequests !== lastDashboardData.inProgressRequests ||
+               newData.resolvedRequests !== lastDashboardData.resolvedRequests ||
+               newData.closedRequests !== lastDashboardData.closedRequests ||
+               newData.criticalRequests !== lastDashboardData.criticalRequests ||
+               newData.recentRequests.length !== lastDashboardData.recentRequests.length ||
+               newData.topTechnicians.length !== lastDashboardData.topTechnicians.length;
+    }
+
+    function updateDashboardMetrics() {
+        fetch('@Url.Action("GetDashboardData", "Reports")')
+            .then(response => response.json())
+            .then(data => {
+                // Only update if data has changed
+                if (!hasDataChanged(data)) {
+                    return;
+                }
+
+                lastDashboardData = JSON.parse(JSON.stringify(data));
+
+                // Update KPI Cards
+                const kpiCards = document.querySelectorAll('.kpi-value');
+                if (kpiCards.length >= 4) {
+                    kpiCards[0].textContent = data.totalRequests;
+                    kpiCards[1].textContent = data.pendingRequests;
+                    kpiCards[2].textContent = data.inProgressRequests;
+                    kpiCards[3].textContent = data.criticalRequests;
+                }
+
+                // Update Recent Requests Table
+                const tbody = document.querySelector('.recent-table tbody');
+                if (tbody && data.recentRequests && data.recentRequests.length > 0) {
+                    tbody.innerHTML = '';
+                    data.recentRequests.forEach(request => {
+                        const priorityClass = getPriorityClass(request.priority);
+                        const priorityText = getPriorityText(request.priority);
+                        const statusClass = getStatusClass(request.status);
+                        const statusText = getStatusText(request.status);
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><strong>${request.requestNumber}</strong></td>
+                            <td><span class="text-truncate" title="${request.title}">${request.title.substring(0, 20)}${request.title.length > 20 ? '...' : ''}</span></td>
+                            <td><span class="badge status-badge ${priorityClass}">${priorityText}</span></td>
+                            <td><span class="badge ${statusClass}">${statusText}</span></td>
+                            <td>${request.assignedTechnicianName}</td>
+                            <td>${request.requestorName}</td>
+                            <td><small>${new Date(request.createdAt).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}</small></td>
+                            <td>
+                                <a href="/ServiceRequests/Details/${request.requestId}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+
+                // Update Top Technicians
+                const techContainer = document.querySelector('[data-tech-container]');
+                if (techContainer && data.topTechnicians && data.topTechnicians.length > 0) {
+                    techContainer.innerHTML = '';
+                    data.topTechnicians.forEach(tech => {
+                        const techItem = document.createElement('div');
+                        techItem.className = 'tech-item';
+                        techItem.innerHTML = `
+                            <div class="tech-name">${tech.technician}</div>
+                            <div class="tech-stats">
+                                <div class="stat-count">
+                                    <div class="stat-number">${tech.assignedCount}</div>
+                                    <div class="stat-label">Assigned</div>
+                                </div>
+                                <div class="stat-count">
+                                    <div class="stat-number">${tech.completedCount}</div>
+                                    <div class="stat-label">Completed</div>
+                                </div>
+                            </div>
+                        `;
+                        techContainer.appendChild(techItem);
+                    });
+                }
+            })
+            .catch(error => console.error('Error updating dashboard:', error));
+    }
+
+    function getPriorityClass(priority) {
+        const priorityMap = {
+            'Low': 'priority-low',
+            'Medium': 'priority-medium',
+            'High': 'priority-high',
+            'Critical': 'priority-critical',
+            0: 'priority-low',
+            1: 'priority-medium',
+            2: 'priority-high',
+            3: 'priority-critical',
+            4: 'priority-critical'
+        };
+        return priorityMap[priority] || 'priority-low';
+    }
+
+    function getPriorityText(priority) {
+        const priorityMap = {
+            'Low': 'Low',
+            'Medium': 'Medium',
+            'High': 'High',
+            'Critical': 'Critical',
+            0: 'Low',
+            1: 'Medium',
+            2: 'High',
+            3: 'Critical',
+            4: 'Critical'
+        };
+        return priorityMap[priority] || 'Low';
+    }
+
+    function getStatusClass(status) {
+        const statusMap = {
+            'Pending': 'bg-info',
+            'InProgress': 'bg-warning text-dark',
+            'In Progress': 'bg-warning text-dark',
+            'OnHold': 'bg-secondary',
+            'On Hold': 'bg-secondary',
+            'Resolved': 'bg-success',
+            'Closed': 'bg-dark',
+            0: 'bg-info',
+            1: 'bg-warning text-dark',
+            2: 'bg-secondary',
+            3: 'bg-success',
+            4: 'bg-dark'
+        };
+        return statusMap[status] || 'bg-light text-dark';
+    }
+
+    function getStatusText(status) {
+        const statusMap = {
+            'Pending': 'Pending',
+            'InProgress': 'In Progress',
+            'In Progress': 'In Progress',
+            'OnHold': 'On Hold',
+            'On Hold': 'On Hold',
+            'Resolved': 'Resolved',
+            'Closed': 'Closed',
+            0: 'Pending',
+            1: 'In Progress',
+            2: 'On Hold',
+            3: 'Resolved',
+            4: 'Closed'
+        };
+        return statusMap[status] || 'Pending';
+    }
+
+    // Initialize auto-refresh and other DOM operations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize animations
+        document.querySelectorAll('.kpi-value').forEach((el, index) => {
+            el.style.animation = `fadeInUp 0.6s ease ${index * 0.1}s both`;
+        });
+
+        // Get initial dashboard data
+        updateDashboardMetrics();
+
+        // Check for changes every 10 seconds (silently)
+        autoRefreshInterval = setInterval(updateDashboardMetrics, 10000);
+
+        // Stop auto-refresh when user leaves the page
+        window.addEventListener('beforeunload', () => {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        });
+    });
+
+    // Add spin animation for refresh button
+    const spinStyle = document.createElement('style');
+    spinStyle.textContent = `
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(spinStyle);
+</script>
+
+<!-- Pending Requests Modal -->
+<div class="modal fade" id="pendingRequestsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h5 class="modal-title"><i class="bi bi-hourglass-split"></i> Pending Requests</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="pendingModalBody">
+                <div class="text-center p-4">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Critical Requests Modal -->
+<div class="modal fade" id="criticalRequestsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h5 class="modal-title"><i class="bi bi-fire"></i> Critical Issues</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="criticalModalBody">
+                <div class="text-center p-4">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

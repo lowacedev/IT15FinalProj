@@ -1,0 +1,51 @@
+@model ITSMS.Models.ServiceRequest
+
+@{
+    ViewData["Title"] = "Close Service Request";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Close Service Request</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> After closing this request, clients will be able to provide feedback.
+                    </div>
+
+                    <p class="mb-3">
+                        You are about to close the following service request:
+                    </p>
+
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <p class="mb-1"><strong>Request #:</strong> @Model.RequestId</p>
+                            <p class="mb-1"><strong>Title:</strong> @Model.Title</p>
+                            <p class="mb-1"><strong>Category:</strong> @Model.Category?.CategoryName</p>
+                            <p class="mb-1"><strong>Status:</strong> <span class="badge bg-secondary">@Model.Status</span></p>
+                            <p class="mb-0"><strong>Requestor:</strong> @Model.Requestor?.FullName</p>
+                        </div>
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        The status will be changed to "Closed" and the request will no longer be editable.
+                    </p>
+
+                    <form method="post" asp-action="Close" asp-route-id="@Model.RequestId">
+                        <div class="d-grid gap-2 d-md-block">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-archive"></i> Close Request
+                            </button>
+                            <a href="@Url.Action("Details", "ServiceRequests", new { id = Model.RequestId })" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

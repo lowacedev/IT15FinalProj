@@ -1,0 +1,186 @@
+@model List<ITSMS.Models.Feedback>
+
+@{
+    ViewData["Title"] = "Customer Satisfaction";
+    var satisfaction = ViewData["Satisfaction"] as dynamic;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Customer Satisfaction Report</h2>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Feedback</h6>
+                    <h2 class="mb-0">@satisfaction?.TotalFeedback</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Average Rating</h6>
+                    <h2 class="mb-0">@satisfaction?.AverageRating ⭐</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Satisfaction Level</h6>
+                    <h2 class="mb-0">
+                        @if (satisfaction?.AverageRating >= 4.5)
+                        {
+                            <span>Excellent</span>
+                        }
+                        else if (satisfaction?.AverageRating >= 4.0)
+                        {
+                            <span>Very Good</span>
+                        }
+                        else if (satisfaction?.AverageRating >= 3.0)
+                        {
+                            <span>Good</span>
+                        }
+                        else
+                        {
+                            <span>Fair</span>
+                        }
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Distribution -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Rating Distribution</h5>
+                </div>
+                <div class="card-body">
+                    @if (satisfaction?.RatingDistribution != null && satisfaction.RatingDistribution.Count > 0)
+                    {
+                        <ul class="list-group">
+                            @foreach (var rating in satisfaction.RatingDistribution)
+                            {
+                                var starDisplay = new string('⭐', (int)rating.Stars);
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@starDisplay</span>
+                                    <span class="badge bg-primary rounded-pill">@rating.Count</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No feedback data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Average Rating by Category</h5>
+                </div>
+                <div class="card-body">
+                    @if (satisfaction?.ByCategoryAverage != null && satisfaction.ByCategoryAverage.Count > 0)
+                    {
+                        <ul class="list-group">
+                            @foreach (var cat in satisfaction.ByCategoryAverage)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span><strong>@cat.Category</strong></span>
+                                        <span class="badge bg-success">@cat.Count feedback</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: @(cat.AvgRating * 20)%">
+                                            @cat.AvgRating ⭐
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No category data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Feedback List -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Recent Feedback</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Request ID</th>
+                                        <th>Category</th>
+                                        <th>Rating</th>
+                                        <th>Comment</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var feedback in Model != null ? Model.OrderByDescending(f => f.ProvidedAt).Take(20) : new List<ITSMS.Models.Feedback>())
+                                    {
+                                        <tr>
+                                            <td>#@feedback.RequestId</td>
+                                            <td>@feedback.Request?.Category?.CategoryName</td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    @(new string('⭐', feedback.Rating))
+                                                </span>
+                                            </td>
+                                            <td>@feedback.Comments</td>
+                                            <td>@(feedback.ProvidedAt != default ? feedback.ProvidedAt.ToString("MMM dd, yyyy") : "")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No feedback records available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="@Url.Action("Dashboard", "Reports")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>

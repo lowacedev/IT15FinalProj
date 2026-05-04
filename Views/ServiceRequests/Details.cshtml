@@ -18,7 +18,7 @@
                             @{
                                 var statusClass = Model.Status switch
                                 {
-                                    ITSMS.Models.ServiceRequestStatus.Open => "bg-primary",
+                                    ITSMS.Models.ServiceRequestStatus.Pending => "bg-primary",
                                     ITSMS.Models.ServiceRequestStatus.InProgress => "bg-warning text-dark",
                                     ITSMS.Models.ServiceRequestStatus.OnHold => "bg-secondary",
                                     ITSMS.Models.ServiceRequestStatus.Resolved => "bg-success",
@@ -165,7 +165,7 @@
                     <h5>Actions</h5>
                 </div>
                 <div class="card-body d-grid gap-2">
-                    @if (User.IsInRole("Admin"))
+                    @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
                     {
                         @if (Model.Status != ITSMS.Models.ServiceRequestStatus.Closed)
                         {
@@ -174,7 +174,7 @@
                             <a href="@Url.Action("Assign", "Assignments", new { requestId = Model.RequestId })" 
                                class="btn btn-info">Assign Technician</a>
                         }
-                        @if (Model.Status != ITSMS.Models.ServiceRequestStatus.Open && Model.Status != ITSMS.Models.ServiceRequestStatus.Closed)
+                        @if (Model.Status != ITSMS.Models.ServiceRequestStatus.Pending && Model.Status != ITSMS.Models.ServiceRequestStatus.Closed)
                         {
                             <a href="@Url.Action("Close", "ServiceRequests", new { id = Model.RequestId })" 
                                class="btn btn-danger">Close Request</a>
@@ -188,7 +188,7 @@
                                class="btn btn-warning">Update Status</a>
                         }
                     }
-                    else if (User.IsInRole("Client"))
+                    else if (User.IsInRole("Employee"))
                     {
                         @if (Model.Status == ITSMS.Models.ServiceRequestStatus.Resolved || 
                              Model.Status == ITSMS.Models.ServiceRequestStatus.Closed)

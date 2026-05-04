@@ -1,0 +1,454 @@
+@model List<ITSMS.Models.User>
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<style>
+    .details-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    .details-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .details-header-content h1 {
+        font-weight: 700;
+        margin-bottom: 0;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .details-header-content i {
+        font-size: 2.5rem;
+    }
+
+    .new-request-btn {
+        white-space: nowrap;
+    }
+
+    .details-table-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .table-header i {
+        font-size: 1.25rem;
+    }
+
+    .result-count {
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .details-table {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    .details-table thead {
+        background: #f3f4f6;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .details-table thead th {
+        font-weight: 600;
+        color: #374151;
+        padding: 1rem;
+        border: none;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .details-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .details-table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .details-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .user-link {
+        font-weight: 600;
+        color: #667eea;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .user-link:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        background: #bfdbfe;
+        color: #1e40af;
+    }
+
+    .small-text {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .filter-section {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    @@media (max-width: 768px) {
+        .details-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .details-header-content h1 {
+            font-size: 1.5rem;
+        }
+
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .details-table {
+            font-size: 0.8rem;
+        }
+
+        .details-table thead th,
+        .details-table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .status-badge,
+        .role-badge {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.65rem;
+        }
+    }
+</style>
+
+<div class="details-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="details-header">
+            <div class="details-header-content">
+                <h1>
+                    <i class="bi bi-people"></i> User Management
+                </h1>
+            </div>
+            <a href="@Url.Action("Create", "Users")" class="btn btn-light new-request-btn">
+                <i class="bi bi-plus-circle"></i> Add New User
+            </a>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="get" class="d-flex gap-2">
+                <input type="text" name="roleFilter" class="form-control" placeholder="Filter by role" value="@ViewData["RoleFilter"]" />
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+                @if (!string.IsNullOrEmpty(ViewData["RoleFilter"]?.ToString()))
+                {
+                    <a href="@Url.Action("Index", "Users")" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                }
+            </form>
+        </div>
+
+        <!-- Results Table -->
+        <div class="details-table-card">
+            <div class="table-header">
+                <div>
+                    <i class="bi bi-table"></i> Users
+                </div>
+                <div class="result-count">
+                    Showing @(Model.Count > 0 ? ((ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1) : 0) to @((ViewBag.CurrentPage - 1) * ViewBag.PageSize + Model.Count) of @ViewBag.TotalCount results
+                </div>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>No users found.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table details-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Phone</th>
+                                <th style="text-align: center;">Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <!-- Username -->
+                                    <td>
+                                        <span class="user-link">@user.Username</span>
+                                    </td>
+
+                                    <!-- Name -->
+                                    <td>
+                                        <div>@user.FirstName @user.LastName</div>
+                                    </td>
+
+                                    <!-- Email -->
+                                    <td>
+                                        <div class="small-text">@user.Email</div>
+                                    </td>
+
+                                    <!-- Role -->
+                                    <td>
+                                        <span class="role-badge">@user.Role?.RoleName</span>
+                                    </td>
+
+                                    <!-- Phone -->
+                                    <td>@user.PhoneNumber</td>
+
+                                    <!-- Status -->
+                                    <td style="text-align: center;">
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="status-badge status-active">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-inactive">Inactive</span>
+                                        }
+                                    </td>
+
+                                    <!-- Created Date -->
+                                    <td>
+                                        <small>@(user.CreatedAt != default ? user.CreatedAt.ToString("MMM dd, yyyy") : "-")</small>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="@Url.Action("Details", "Users", new { id = user.UserId })" 
+                                               class="btn btn-outline-primary" title="View Details">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <a href="@Url.Action("Edit", "Users", new { id = user.UserId })" 
+                                               class="btn btn-outline-warning" title="Edit">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </a>
+                                            @if (user.IsActive)
+                                            {
+                                                <a href="@Url.Action("DeactivateConfirm", "Users", new { id = user.UserId })" 
+                                                   class="btn btn-outline-danger" title="Deactivate">
+                                                    <i class="bi bi-lock"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <div style="padding: 1.5rem; background: #f9fafb; border-top: 1px solid #e5e7eb; display: flex; justify-content: center; gap: 0.5rem;">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination mb-0" style="gap: 0.25rem;">
+                                <!-- Previous Button -->
+                                <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
+                                    @if (ViewBag.CurrentPage > 1)
+                                    {
+                                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, roleFilter = ViewData["RoleFilter"] })" 
+                                           style="color: #667eea; border-color: #e5e7eb;">
+                                            <i class="bi bi-chevron-left"></i> Previous
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="page-link" style="color: #d1d5db; border-color: #e5e7eb;">
+                                            <i class="bi bi-chevron-left"></i> Previous
+                                        </span>
+                                    }
+                                </li>
+
+                                <!-- Page Numbers -->
+                                @{
+                                    int startPage = Math.Max(1, ViewBag.CurrentPage - 2);
+                                    int endPage = Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2);
+
+                                    if (startPage > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Index", new { page = 1, roleFilter = ViewData["RoleFilter"] })" 
+                                               style="color: #667eea; border-color: #e5e7eb;">1</a>
+                                        </li>
+                                        if (startPage > 2)
+                                        {
+                                            <li class="page-item disabled">
+                                                <span class="page-link" style="border-color: #e5e7eb;">...</span>
+                                            </li>
+                                        }
+                                    }
+
+                                    for (int i = startPage; i <= endPage; i++)
+                                    {
+                                        if (i == ViewBag.CurrentPage)
+                                        {
+                                            <li class="page-item active">
+                                                <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-color: #667eea;">
+                                                    @i
+                                                </span>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="@Url.Action("Index", new { page = i, roleFilter = ViewData["RoleFilter"] })" 
+                                                   style="color: #667eea; border-color: #e5e7eb;">@i</a>
+                                            </li>
+                                        }
+                                    }
+
+                                    if (endPage < ViewBag.TotalPages)
+                                    {
+                                        if (endPage < ViewBag.TotalPages - 1)
+                                        {
+                                            <li class="page-item disabled">
+                                                <span class="page-link" style="border-color: #e5e7eb;">...</span>
+                                            </li>
+                                        }
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.TotalPages, roleFilter = ViewData["RoleFilter"] })" 
+                                               style="color: #667eea; border-color: #e5e7eb;">@ViewBag.TotalPages</a>
+                                        </li>
+                                    }
+                                }
+
+                                <!-- Next Button -->
+                                <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
+                                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                                    {
+                                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, roleFilter = ViewData["RoleFilter"] })" 
+                                           style="color: #667eea; border-color: #e5e7eb;">
+                                            Next <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="page-link" style="color: #d1d5db; border-color: #e5e7eb;">
+                                            Next <i class="bi bi-chevron-right"></i>
+                                        </span>
+                                    }
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-4">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+</div>

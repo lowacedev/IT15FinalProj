@@ -1,0 +1,558 @@
+@model ReportsViewModel
+
+@{
+    ViewData["Title"] = "Service Requests Details";
+}
+
+<style>
+    .details-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    .details-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .details-header h1 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .details-header p {
+        opacity: 0.95;
+        margin: 0;
+    }
+
+    .filter-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-group {
+        margin-bottom: 1rem;
+    }
+
+    .filter-group label {
+        font-weight: 500;
+        color: #374151;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-buttons .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .details-table-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .table-header i {
+        font-size: 1.25rem;
+    }
+
+    .result-count {
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .details-table {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    .details-table thead {
+        background: #f3f4f6;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .details-table thead th {
+        font-weight: 600;
+        color: #374151;
+        padding: 1rem;
+        border: none;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .details-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .details-table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .details-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .request-link {
+        font-weight: 600;
+        color: #667eea;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .request-link:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+
+    .priority-badge {
+        display: inline-block;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .priority-low {
+        background: #dbeafe;
+        color: #0369a1;
+    }
+
+    .priority-medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .priority-high {
+        background: #fed7aa;
+        color: #9a3412;
+    }
+
+    .priority-critical {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-inprogress {
+        background: #bfdbfe;
+        color: #1e40af;
+    }
+
+    .status-resolved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-closed {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .small-text {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        gap: 0.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .details-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .details-table {
+            font-size: 0.8rem;
+        }
+
+        .details-table thead th,
+        .details-table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .priority-badge,
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.65rem;
+        }
+    }
+</style>
+
+<div class="details-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="details-header">
+            <h1>
+                <i class="bi bi-list-check"></i> Service Requests - Detailed View
+            </h1>
+            <p>Filter and search through all service requests with detailed information</p>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Summary Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="filter-card text-center">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #667eea;">@Model.TotalRequests</div>
+                    <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">Total Requests</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="filter-card text-center">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #f97316;">@Model.PendingRequests</div>
+                    <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">Pending</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="filter-card text-center">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #06b6d4;">@Model.InProgressRequests</div>
+                    <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">In Progress</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="filter-card text-center">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #dc2626;">@Model.CriticalRequests</div>
+                    <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">Critical</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-card">
+            <div class="filter-title">
+                <i class="bi bi-funnel"></i> Filter Results
+            </div>
+            
+            <form method="get" action="@Url.Action("ServiceRequestsDetails", "Reports")" id="filterForm">
+                <div class="row">
+                    <!-- Search Box -->
+                    <div class="col-md-6 mb-3">
+                        <div class="filter-group">
+                            <label for="search">Search by Title or Requestor</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   placeholder="Enter title or requestor name..." 
+                                   value="@Model.SearchQuery">
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="col-md-3 mb-3">
+                        <div class="filter-group">
+                            <label for="status">Filter by Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Status</option>
+                                @if (Model.SelectedStatus == "Pending")
+                                {
+                                    <option value="Pending" selected>Pending</option>
+                                }
+                                else
+                                {
+                                    <option value="Pending">Pending</option>
+                                }
+                                @if (Model.SelectedStatus == "InProgress")
+                                {
+                                    <option value="InProgress" selected>In Progress</option>
+                                }
+                                else
+                                {
+                                    <option value="InProgress">In Progress</option>
+                                }
+                                @if (Model.SelectedStatus == "Resolved")
+                                {
+                                    <option value="Resolved" selected>Resolved</option>
+                                }
+                                else
+                                {
+                                    <option value="Resolved">Resolved</option>
+                                }
+                                @if (Model.SelectedStatus == "Closed")
+                                {
+                                    <option value="Closed" selected>Closed</option>
+                                }
+                                else
+                                {
+                                    <option value="Closed">Closed</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Priority Filter -->
+                    <div class="col-md-3 mb-3">
+                        <div class="filter-group">
+                            <label for="priority">Filter by Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="">All Priority</option>
+                                @if (Model.SelectedPriority == "Low")
+                                {
+                                    <option value="Low" selected>Low</option>
+                                }
+                                else
+                                {
+                                    <option value="Low">Low</option>
+                                }
+                                @if (Model.SelectedPriority == "Medium")
+                                {
+                                    <option value="Medium" selected>Medium</option>
+                                }
+                                else
+                                {
+                                    <option value="Medium">Medium</option>
+                                }
+                                @if (Model.SelectedPriority == "High")
+                                {
+                                    <option value="High" selected>High</option>
+                                }
+                                else
+                                {
+                                    <option value="High">High</option>
+                                }
+                                @if (Model.SelectedPriority == "Critical")
+                                {
+                                    <option value="Critical" selected>Critical</option>
+                                }
+                                else
+                                {
+                                    <option value="Critical">Critical</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Buttons -->
+                <div class="filter-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Apply Filters
+                    </button>
+                    <a href="@Url.Action("ServiceRequestsDetails", "Reports")" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> Clear All
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Table -->
+        <div class="details-table-card">
+            <div class="table-header">
+                <div>
+                    <i class="bi bi-table"></i> Service Requests
+                </div>
+                <div class="result-count">
+                    Showing @Model.ServiceRequestDetails.Count of @Model.TotalRequests results
+                </div>
+            </div>
+
+            @if (Model.ServiceRequestDetails != null && Model.ServiceRequestDetails.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table details-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Request #</th>
+                                <th>Title</th>
+                                <th>Requestor</th>
+                                <th>Category</th>
+                                <th style="text-align: center;">Priority</th>
+                                <th style="text-align: center;">Status</th>
+                                <th>Technician</th>
+                                <th>Created</th>
+                                <th>Days Open</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var request in Model.ServiceRequestDetails)
+                            {
+                                <tr>
+                                    <!-- Request Number -->
+                                    <td>
+                                        <a href="@Url.Action("Details", "ServiceRequests", new { id = request.RequestId })" 
+                                           class="request-link">
+                                            @(request.RequestNumber ?? $"REQ-{request.RequestId:D4}")
+                                        </a>
+                                    </td>
+
+                                    <!-- Title -->
+                                    <td>
+                                        <div>@request.Title</div>
+                                        <div class="small-text">@request.Description.Substring(0, Math.Min(50, request.Description.Length))@(request.Description.Length > 50 ? "..." : "")</div>
+                                    </td>
+
+                                    <!-- Requestor -->
+                                    <td>
+                                        <div>@request.Requestor</div>
+                                        <div class="small-text">@request.RequestorEmail</div>
+                                    </td>
+
+                                    <!-- Category -->
+                                    <td>@request.Category</td>
+
+                                    <!-- Priority -->
+                                    <td style="text-align: center;">
+                                        @{
+                                            string priorityClass = "priority-medium";
+                                            if (request.Priority == "Low") priorityClass = "priority-low";
+                                            else if (request.Priority == "High") priorityClass = "priority-high";
+                                            else if (request.Priority == "Critical") priorityClass = "priority-critical";
+                                        }
+                                        <span class="priority-badge @priorityClass">@request.Priority</span>
+                                    </td>
+
+                                    <!-- Status -->
+                                    <td style="text-align: center;">
+                                        @{
+                                            string statusClass = "status-pending";
+                                            if (request.Status == "Pending") statusClass = "status-pending";
+                                            else if (request.Status == "InProgress") statusClass = "status-inprogress";
+                                            else if (request.Status == "Resolved") statusClass = "status-resolved";
+                                            else if (request.Status == "Closed") statusClass = "status-closed";
+                                        }
+                                        <span class="status-badge @statusClass">@request.Status</span>
+                                    </td>
+
+                                    <!-- Technician -->
+                                    <td>@request.AssignedTechnician</td>
+
+                                    <!-- Created Date -->
+                                    <td>
+                                        <div>@request.CreatedAt.ToString("MM/dd/yyyy")</div>
+                                        <div class="small-text">@request.CreatedAt.ToString("hh:mm tt")</div>
+                                    </td>
+
+                                    <!-- Days Open -->
+                                    <td>
+                                        <span class="badge @(request.DaysOpen > 7 ? "bg-danger" : request.DaysOpen > 3 ? "bg-warning" : "bg-success")">
+                                            @request.DaysOpen day@(request.DaysOpen != 1 ? "s" : "")
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>No service requests found matching your filters.</p>
+                    <a href="@Url.Action("ServiceRequestsDetails", "Reports")" class="btn btn-sm btn-outline-primary mt-3">
+                        <i class="bi bi-arrow-clockwise"></i> Clear Filters
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-4">
+            <a href="@Url.Action("Analytics", "Reports")" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Analytics
+            </a>
+        </div>
+    </div>
+</div>

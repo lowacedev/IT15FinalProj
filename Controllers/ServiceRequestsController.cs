@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ITSMS.Data;
 using ITSMS.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ITSMS.Controllers
 {
@@ -9,13 +11,15 @@ namespace ITSMS.Controllers
     /// ServiceRequests Controller - Handles service request ticketing operations
     /// Authorization: Client (create), Technician (update/view), Admin (view all)
     /// </summary>
+    [Route("[controller]")]
     [Authorize]
     public class ServiceRequestsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private const string AdminRole = "Admin";
+        private const string SuperAdminRole = "SuperAdmin";
         private const string TechnicianRole = "Technician";
-        private const string ClientRole = "Client";
+        private const string EmployeeRole = "Employee";
 
         public ServiceRequestsController(ApplicationDbContext context)
         {
@@ -23,8 +27,9 @@ namespace ITSMS.Controllers
         }
 
         // GET: ServiceRequests/Index (List all requests - filtered by role)
-        [HttpGet]
-        public IActionResult Index()
+        [HttpGet("")]
+        [HttpGet("Index")]
+        public IActionResult Index(int page = 1, int pageSize = 10)
         {
             var userId = GetCurrentUserId();
             var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
@@ -33,10 +38,12 @@ namespace ITSMS.Controllers
                 .Include(sr => sr.Category)
                 .Include(sr => sr.Requestor)
                 .Include(sr => sr.AssignedTechnician)
+                .Include(sr => sr.Employee)
+                    .ThenInclude(e => e.User)
                 .AsQueryable();
 
             // Filter based on role
-            if (userRole == ClientRole)
+            if (userRole == EmployeeRole)
             {
                 // Clients see only their own requests
                 requests = requests.Where(sr => sr.RequestorId == userId);
@@ -48,18 +55,39 @@ namespace ITSMS.Controllers
             }
             // Admin sees all requests
 
-            var serviceRequests = requests.OrderByDescending(sr => sr.CreatedAt).ToList();
+            // Get total count before pagination
+            var totalCount = requests.Count();
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            // Ensure page is valid
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            // Apply pagination
+            var serviceRequests = requests.OrderByDescending(sr => sr.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Pass pagination info via ViewBag
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.PageSize = pageSize;
+
             return View(serviceRequests);
         }
 
         // GET: ServiceRequests/Details/5
-        [HttpGet]
+        [HttpGet("Details/{id}")]
         public IActionResult Details(int id)
         {
             var request = _context.ServiceRequests
                 .Include(sr => sr.Category)
                 .Include(sr => sr.Requestor)
                 .Include(sr => sr.AssignedTechnician)
+                .Include(sr => sr.Employee)
+                    .ThenInclude(e => e.User)
                 .Include(sr => sr.Assignments)
                 .Include(sr => sr.Feedback)
                 .FirstOrDefault(sr => sr.RequestId == id);
@@ -75,21 +103,60 @@ namespace ITSMS.Controllers
         }
 
         // GET: ServiceRequests/Create
-        [HttpGet]
-        [Authorize(Roles = "Client,Admin")]
+        [HttpGet("Create")]
+        [Authorize(Roles = "Employee,Admin,SuperAdmin")]
         public IActionResult Create()
         {
+            var userId = GetCurrentUserId();
+            var viewModel = new ServiceRequestCreateViewModel();
+
+            // Get categories
             ViewData["Categories"] = _context.Categories.Where(c => c.IsActive).ToList();
-            return View();
+
+            // Get current logged-in employee
+            var employee = _context.Employees.FirstOrDefault(e => e.UserId == userId);
+            if (employee != null)
+            {
+                // Get assets assigned to this employee (only active assignments - no return date)
+                var employeeAssets = _context.AssetAssignments
+                    .Where(a => a.EmployeeId == employee.Id && a.ReturnedDate == null)
+                    .Include(a => a.Asset)
+                    .Select(a => new SelectListItem
+                    {
+                        Value = a.AssetId.ToString(),
+                        Text = $"{a.Asset.AssetTag} - {a.Asset.AssetName}"
+                    })
+                    .ToList();
+
+                viewModel.EmployeeAssets = employeeAssets;
+
+                // Smart UX: Auto-select if only one asset
+                if (employeeAssets.Count == 1)
+                {
+                    viewModel.AssetId = int.Parse(employeeAssets[0].Value);
+                }
+            }
+
+            return View(viewModel);
         }
 
         // POST: ServiceRequests/Create
-        [HttpPost]
+        [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Client,Admin")]
-        public async Task<IActionResult> Create(ServiceRequest serviceRequest)
+        [Authorize(Roles = "Employee,Admin")]
+        public async Task<IActionResult> Create(ServiceRequestCreateViewModel model)
         {
             var userId = GetCurrentUserId();
+
+            // Map ViewModel to ServiceRequest
+            var serviceRequest = new ServiceRequest
+            {
+                Title = model.Title,
+                Description = model.Description,
+                CategoryId = model.CategoryId,
+                Priority = model.Priority,
+                AssetId = model.AssetId // Optional asset from dropdown
+            };
 
             // Generate unique request number
             var lastRequest = _context.ServiceRequests.OrderByDescending(sr => sr.RequestId).FirstOrDefault();
@@ -97,8 +164,15 @@ namespace ITSMS.Controllers
             serviceRequest.RequestNumber = $"REQ-{nextNumber:000000}";
 
             serviceRequest.RequestorId = userId;
-            serviceRequest.Status = ServiceRequestStatus.Open;
+            serviceRequest.Status = ServiceRequestStatus.Pending;
             serviceRequest.CreatedAt = DateTime.UtcNow;
+
+            // Auto-link EmployeeId from User's Employee record
+            var employee = _context.Employees.FirstOrDefault(e => e.UserId == userId);
+            if (employee != null)
+            {
+                serviceRequest.EmployeeId = employee.Id;
+            }
 
             if (ModelState.IsValid)
             {
@@ -108,43 +182,106 @@ namespace ITSMS.Controllers
                 return RedirectToAction(nameof(Details), new { id = serviceRequest.RequestId });
             }
 
+            // Repopulate form with employee assets on validation error
+            var viewModel = new ServiceRequestCreateViewModel
+            {
+                Title = model.Title,
+                Description = model.Description,
+                CategoryId = model.CategoryId,
+                Priority = model.Priority,
+                AssetId = model.AssetId
+            };
+
+            if (employee != null)
+            {
+                var employeeAssets = _context.AssetAssignments
+                    .Where(a => a.EmployeeId == employee.Id && a.ReturnedDate == null)
+                    .Include(a => a.Asset)
+                    .Select(a => new SelectListItem
+                    {
+                        Value = a.AssetId.ToString(),
+                        Text = $"{a.Asset.AssetTag} - {a.Asset.AssetName}"
+                    })
+                    .ToList();
+                viewModel.EmployeeAssets = employeeAssets;
+            }
+
             ViewData["Categories"] = _context.Categories.Where(c => c.IsActive).ToList();
-            return View(serviceRequest);
+            return View(viewModel);
         }
 
         // GET: ServiceRequests/Edit/5
-        [HttpGet]
-        [Authorize(Roles = "Technician,Admin")]
+        [HttpGet("Edit/{id}")]
+        [Authorize(Roles = "Technician,Admin,SuperAdmin")]
         public IActionResult Edit(int id)
         {
-            var request = _context.ServiceRequests.FirstOrDefault(sr => sr.RequestId == id);
-            if (request == null)
-                return NotFound();
+            try
+            {
+                var request = _context.ServiceRequests
+                    .Include(sr => sr.AssignedTechnician)
+                    .FirstOrDefault(sr => sr.RequestId == id);
+                
+                if (request == null)
+                {
+                    return NotFound($"Service request with ID {id} not found");
+                }
 
-            ViewData["Categories"] = _context.Categories.Where(c => c.IsActive).ToList();
-            return View(request);
+                // Authorization check - ensure technician can only edit their assigned requests
+                var userId = GetCurrentUserId();
+                var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                
+                if (userRole == TechnicianRole && request.AssignedTechnicianId != userId)
+                    return Forbid();
+
+                ViewData["Categories"] = _context.Categories.Where(c => c.IsActive).ToList();
+                return View(request);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
         }
 
         // POST: ServiceRequests/Edit/5
-        [HttpPost]
+        [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Technician,Admin")]
+        [Authorize(Roles = "Technician,Admin,SuperAdmin")]
         public async Task<IActionResult> Edit(int id, ServiceRequest serviceRequest)
         {
             if (id != serviceRequest.RequestId)
                 return NotFound();
 
-            var existingRequest = _context.ServiceRequests.FirstOrDefault(sr => sr.RequestId == id);
+            var existingRequest = _context.ServiceRequests
+                .Include(sr => sr.AssignedTechnician)
+                .FirstOrDefault(sr => sr.RequestId == id);
             if (existingRequest == null)
                 return NotFound();
 
+            // Authorization check - ensure technician can only edit their assigned requests
+            var userId = GetCurrentUserId();
+            var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            
+            if (userRole == TechnicianRole && existingRequest.AssignedTechnicianId != userId)
+                return Forbid();
+
             try
             {
-                existingRequest.Title = serviceRequest.Title;
-                existingRequest.Description = serviceRequest.Description;
+                // Admins and SuperAdmins can update all fields; Technicians can only update Status and Priority
+                if (userRole == AdminRole || userRole == SuperAdminRole)
+                {
+                    existingRequest.Title = serviceRequest.Title;
+                    existingRequest.Description = serviceRequest.Description;
+                }
+
                 existingRequest.Status = serviceRequest.Status;
                 existingRequest.Priority = serviceRequest.Priority;
                 existingRequest.UpdatedAt = DateTime.UtcNow;
+
+                // Set ResolvedAt timestamp when status changes to Resolved
+                if (serviceRequest.Status == ServiceRequestStatus.Resolved && existingRequest.Status != ServiceRequestStatus.Resolved)
+                {
+                    existingRequest.ResolvedAt = DateTime.UtcNow;
+                }
 
                 _context.ServiceRequests.Update(existingRequest);
                 await _context.SaveChangesAsync();
@@ -161,27 +298,41 @@ namespace ITSMS.Controllers
             return View(serviceRequest);
         }
 
-        // GET: ServiceRequests/Close/5
-        [HttpGet]
-        [Authorize(Roles = "Technician,Admin")]
-        public IActionResult Close(int id)
+        // GET: ServiceRequests/CloseConfirm/5
+        [HttpGet("CloseConfirm/{id}")]
+        [Authorize(Roles = "Technician,Admin,SuperAdmin")]
+        public IActionResult CloseConfirm(int id)
         {
             var request = _context.ServiceRequests.FirstOrDefault(sr => sr.RequestId == id);
             if (request == null)
                 return NotFound();
 
-            return View(request);
+            // Authorization check - ensure technician can only close their assigned requests
+            var userId = GetCurrentUserId();
+            var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            
+            if (userRole == TechnicianRole && request.AssignedTechnicianId != userId)
+                return Forbid();
+
+            return View("Close", request);
         }
 
         // POST: ServiceRequests/Close/5
-        [HttpPost]
+        [HttpPost("Close/{id}")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Technician,Admin")]
+        [Authorize(Roles = "Technician,Admin,SuperAdmin")]
         public async Task<IActionResult> Close(int id)
         {
             var request = _context.ServiceRequests.FirstOrDefault(sr => sr.RequestId == id);
             if (request == null)
                 return NotFound();
+
+            // Authorization check - ensure technician can only close their assigned requests
+            var userId = GetCurrentUserId();
+            var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            
+            if (userRole == TechnicianRole && request.AssignedTechnicianId != userId)
+                return Forbid();
 
             request.Status = ServiceRequestStatus.Closed;
             request.ClosedAt = DateTime.UtcNow;
@@ -207,10 +358,10 @@ namespace ITSMS.Controllers
             var userId = GetCurrentUserId();
             var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
 
-            if (userRole == AdminRole)
+            if (userRole == AdminRole || userRole == SuperAdminRole)
                 return true;
 
-            if (userRole == ClientRole && request.RequestorId == userId)
+            if (userRole == EmployeeRole && request.RequestorId == userId)
                 return true;
 
             if (userRole == TechnicianRole && (request.AssignedTechnicianId == userId || request.AssignedTechnicianId == null))

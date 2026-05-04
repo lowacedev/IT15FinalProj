@@ -2,14 +2,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ITSMS.Data;
 using ITSMS.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ITSMS.Controllers
 {
     /// <summary>
     /// Assignments Controller - Handles assignment of service requests to technicians
-    /// Authorization: Admin only
+    /// Authorization: Admin for assignments, Technician for viewing own workload
     /// </summary>
-    [Authorize(Roles = "Admin")]
+    [Route("[controller]")]
+    [Authorize]
     public class AssignmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,7 +22,8 @@ namespace ITSMS.Controllers
         }
 
         // GET: Assignments/Assign/5
-        [HttpGet]
+        [HttpGet("Assign/{requestId}")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public IActionResult Assign(int requestId)
         {
             var request = _context.ServiceRequests
@@ -33,7 +36,7 @@ namespace ITSMS.Controllers
 
             // Get list of available technicians
             var technicians = _context.Users
-                .Where(u => u.IsActive && u.Role.RoleName == "Technician")
+                .Where(u => u.IsActive && u.Role != null && u.Role.RoleName == "Technician")
                 .ToList();
 
             ViewData["Technicians"] = technicians;
@@ -41,8 +44,9 @@ namespace ITSMS.Controllers
         }
 
         // POST: Assignments/Assign/5
-        [HttpPost]
+        [HttpPost("Assign/{requestId}")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> Assign(int requestId, int technicianId, string notes)
         {
             var request = _context.ServiceRequests.FirstOrDefault(sr => sr.RequestId == requestId);
@@ -91,30 +95,95 @@ namespace ITSMS.Controllers
             return RedirectToAction("Details", "ServiceRequests", new { id = requestId });
         }
 
-        // GET: Assignments/WorkLoad
-        [HttpGet]
+        // POST: Assignments/AssignTechnicianQuick
+        [HttpPost("AssignTechnicianQuick")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> AssignTechnicianQuick(int requestId, int technicianId)
+        {
+            var request = _context.ServiceRequests.FirstOrDefault(sr => sr.RequestId == requestId);
+            if (request == null)
+                return BadRequest("Request not found");
+
+            var technician = _context.Users.FirstOrDefault(u => u.UserId == technicianId && u.IsActive);
+            if (technician == null)
+                return BadRequest("Invalid technician selected");
+
+            var userId = GetCurrentUserId();
+
+            // If request was previously assigned, mark old assignment as inactive
+            var previousAssignment = _context.Assignments
+                .FirstOrDefault(a => a.RequestId == requestId && a.IsActive);
+
+            string? previousTechnicianName = null;
+            if (previousAssignment != null)
+            {
+                var previousTech = _context.Users.FirstOrDefault(u => u.UserId == previousAssignment.TechnicianId);
+                previousTechnicianName = previousTech?.FullName;
+                previousAssignment.IsActive = false;
+                _context.Assignments.Update(previousAssignment);
+            }
+
+            // Create new assignment
+            var newAssignment = new Assignment
+            {
+                RequestId = requestId,
+                TechnicianId = technicianId,
+                AssignedBy = userId,
+                AssignedAt = DateTime.UtcNow,
+                IsActive = true,
+                Notes = "Quick assignment from dashboard"
+            };
+
+            request.AssignedTechnicianId = technicianId;
+            request.Status = ServiceRequestStatus.InProgress;
+            request.UpdatedAt = DateTime.UtcNow;
+
+            _context.Assignments.Add(newAssignment);
+            _context.ServiceRequests.Update(request);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { 
+                success = true,
+                message = previousTechnicianName != null ? 
+                    $"Request reassigned from {previousTechnicianName} to {technician.FullName}" : 
+                    $"Request assigned to {technician.FullName}",
+                technicianName = technician.FullName,
+                previousTechnicianName = previousTechnicianName
+            });
+        }
+
+        // GET: Assignments/Workload
+        [HttpGet("Workload")]
+        [Authorize(Roles = "Admin,SuperAdmin,Technician")]
         public IActionResult Workload()
         {
             var technicians = _context.Users
-                .Where(u => u.IsActive && u.Role.RoleName == "Technician")
-                .Include(u => u.RequestsAssigned)
+                .Where(u => u.IsActive && u.Role != null && u.Role.RoleName == "Technician")
+                .OrderBy(u => u.FirstName)
+                .ThenBy(u => u.LastName)
                 .ToList();
 
-            var workloadData = new Dictionary<string, int>();
+            var allServiceRequests = _context.ServiceRequests.ToList();
 
-            foreach (var tech in technicians)
+            var workloadData = technicians.Select(tech => new
             {
-                var openRequests = _context.ServiceRequests
+                Technician = tech.FullName,
+                OpenRequests = allServiceRequests
+                    .Count(sr => sr.AssignedTechnicianId == tech.UserId && sr.Status == ServiceRequestStatus.Pending),
+                InProgressRequests = allServiceRequests
+                    .Count(sr => sr.AssignedTechnicianId == tech.UserId && sr.Status == ServiceRequestStatus.InProgress),
+                ResolvedRequests = allServiceRequests
+                    .Count(sr => sr.AssignedTechnicianId == tech.UserId && sr.Status == ServiceRequestStatus.Resolved),
+                TotalAssigned = allServiceRequests
                     .Count(sr => sr.AssignedTechnicianId == tech.UserId && 
-                           (sr.Status == ServiceRequestStatus.Open || sr.Status == ServiceRequestStatus.InProgress));
-                workloadData[tech.FullName] = openRequests;
-            }
+                           (sr.Status == ServiceRequestStatus.Pending || sr.Status == ServiceRequestStatus.InProgress))
+            }).ToList();
 
             return View(workloadData);
         }
 
         // GET: Assignments/History/5
-        [HttpGet]
+        [HttpGet("History/{requestId}")]
         public IActionResult History(int requestId)
         {
             var request = _context.ServiceRequests.FirstOrDefault(sr => sr.RequestId == requestId);
@@ -126,6 +195,7 @@ namespace ITSMS.Controllers
                 .Include(a => a.Technician)
                 .Include(a => a.AssignedByUser)
                 .OrderByDescending(a => a.AssignedAt)
+                .AsNoTracking()
                 .ToList();
 
             ViewData["Request"] = request;

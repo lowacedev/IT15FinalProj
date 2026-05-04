@@ -22,6 +22,12 @@ namespace ITSMS.Data
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<ActivityLog> ActivityLogs { get; set; }
 
+        // ERP Modules
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Asset> Assets { get; set; }
+        public DbSet<AssetAssignment> AssetAssignments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -38,7 +44,8 @@ namespace ITSMS.Data
                 entity.HasData(
                     new Role { RoleId = 1, RoleName = "Admin", Description = "IT Administrator with full access" },
                     new Role { RoleId = 2, RoleName = "Technician", Description = "IT Support Technician" },
-                    new Role { RoleId = 3, RoleName = "Client", Description = "Employee / Client / Requestor" }
+                    new Role { RoleId = 3, RoleName = "Employee", Description = "Employee / Requestor" },
+                    new Role { RoleId = 4, RoleName = "SuperAdmin", Description = "System Super Administrator with unrestricted access" }
                 );
             });
 
@@ -66,6 +73,24 @@ namespace ITSMS.Data
 
                 // Index for frequent queries
                 entity.HasIndex(e => e.RoleId);
+
+                // Seed SuperAdmin user
+                var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<User>();
+                var superAdminUser = new User
+                {
+                    UserId = -1,
+                    Username = "superadmin",
+                    Email = "superadmin@itsms.local",
+                    FirstName = "Super",
+                    LastName = "Admin",
+                    PhoneNumber = "",
+                    RoleId = 4,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                superAdminUser.PasswordHash = passwordHasher.HashPassword(superAdminUser, "superadmin123");
+                entity.HasData(superAdminUser);
             });
 
             // ======================== CATEGORY CONFIGURATION ========================
@@ -96,7 +121,7 @@ namespace ITSMS.Data
                 entity.HasIndex(e => e.RequestNumber).IsUnique();
                 entity.Property(e => e.Title).IsRequired().HasMaxLength(150);
                 entity.Property(e => e.Description).IsRequired();
-                entity.Property(e => e.Status).HasDefaultValue(ServiceRequestStatus.Open).HasConversion<string>();
+                entity.Property(e => e.Status).HasDefaultValue(ServiceRequestStatus.Pending).HasConversion<string>();
                 entity.Property(e => e.Priority).HasDefaultValue(ServiceRequestPriority.Medium).HasConversion<string>();
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
@@ -120,6 +145,19 @@ namespace ITSMS.Data
                     .HasForeignKey(sr => sr.AssignedTechnicianId)
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("FK_ServiceRequests_AssignedTechnician");
+
+                // ERP Foreign Keys
+                entity.HasOne(sr => sr.Asset)
+                    .WithMany(a => a.ServiceRequests)
+                    .HasForeignKey(sr => sr.AssetId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("FK_ServiceRequests_Asset");
+
+                entity.HasOne(sr => sr.Employee)
+                    .WithMany(e => e.ServiceRequests)
+                    .HasForeignKey(sr => sr.EmployeeId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("FK_ServiceRequests_Employee");
 
                 // Indexes for performance
                 entity.HasIndex(e => e.Status);
@@ -206,6 +244,67 @@ namespace ITSMS.Data
                 // Indexes
                 entity.HasIndex(e => e.LoggedAt);
                 entity.HasIndex(e => new { e.Entity, e.EntityId });
+            });
+
+            // ======================== ERP MODULES CONFIGURATION ========================
+            
+            // Department Configuration
+            modelBuilder.Entity<Department>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                
+                // Seed initial departments
+                entity.HasData(
+                    new Department { Id = 1, Name = "Information Technology" },
+                    new Department { Id = 2, Name = "Human Resources" },
+                    new Department { Id = 3, Name = "Finance" },
+                    new Department { Id = 4, Name = "Operations" },
+                    new Department { Id = 5, Name = "Marketing" }
+                );
+            });
+
+            // Employee Configuration
+            modelBuilder.Entity<Employee>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.EmployeeCode).HasMaxLength(20);
+                entity.HasIndex(e => e.UserId).IsUnique(); // 1:1 with User
+
+                entity.HasOne(e => e.User)
+                    .WithOne(u => u.Employee)
+                    .HasForeignKey<Employee>(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Department)
+                    .WithMany(d => d.Employees)
+                    .HasForeignKey(e => e.DepartmentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Asset Configuration
+            modelBuilder.Entity<Asset>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.AssetTag).IsRequired().HasMaxLength(50);
+                entity.HasIndex(e => e.AssetTag).IsUnique();
+                entity.Property(e => e.AssetName).IsRequired().HasMaxLength(150);
+            });
+
+            // Asset Assignment Configuration
+            modelBuilder.Entity<AssetAssignment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.HasOne(a => a.Asset)
+                    .WithMany(ast => ast.Assignments)
+                    .HasForeignKey(a => a.AssetId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(a => a.Employee)
+                    .WithMany(emp => emp.AssetAssignments)
+                    .HasForeignKey(a => a.EmployeeId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

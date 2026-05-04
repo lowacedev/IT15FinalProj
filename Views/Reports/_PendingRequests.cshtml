@@ -1,0 +1,162 @@
+@model List<ServiceRequest>
+
+<style>
+    .pending-request-item {
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: #fffbeb;
+        border-radius: 6px;
+    }
+
+    .pending-request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .request-number {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #92400e;
+    }
+
+    .request-title {
+        font-size: 0.95rem;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .request-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-label {
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+        color: #1f2937;
+        font-weight: 600;
+    }
+
+    .assign-section {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .assign-section select {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+
+    .assign-section button {
+        padding: 0.5rem 1rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    .assign-section button:hover {
+        background: #5568d3;
+    }
+
+    .view-btn {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+        margin-right: 0.5rem;
+    }
+
+    .view-btn:hover {
+        text-decoration: underline;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #9ca3af;
+    }
+</style>
+
+@if (Model != null && Model.Count > 0)
+{
+    @foreach (var request in Model)
+    {
+        <div class="pending-request-item">
+            <div class="pending-request-header">
+                <span class="request-number">#@request.RequestNumber</span>
+                <span class="badge bg-warning">@request.Priority</span>
+            </div>
+            
+            <div class="request-title">
+                @request.Title
+            </div>
+
+            <div class="request-details">
+                <div class="detail-item">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value">@request.Status</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Category</span>
+                    <span class="detail-value">@(request.Category?.CategoryName ?? "N/A")</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Requestor</span>
+                    <span class="detail-value">@(request.Requestor?.FullName ?? "N/A")</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Assigned To</span>
+                    <span class="detail-value">@(request.AssignedTechnician?.FullName ?? "Unassigned")</span>
+                </div>
+            </div>
+
+            <div class="assign-section">
+                <select id="technician-@request.RequestId" class="form-select">
+                    <option value="">Select Technician...</option>
+                    @if (ViewBag.Technicians != null)
+                    {
+                        @foreach (var tech in ViewBag.Technicians)
+                        {
+                            <option value="@tech.UserId">@tech.FullName</option>
+                        }
+                    }
+                </select>
+                <button type="button" onclick="assignTechnician(@request.RequestId)">
+                    <i class="bi bi-person-check"></i> Assign
+                </button>
+                <a href="@Url.Action("Details", "ServiceRequests", new { id = request.RequestId })" class="view-btn">
+                    <i class="bi bi-eye"></i> View
+                </a>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="empty-state">
+        <i class="bi bi-check-circle" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+        <p>No pending requests. Great job!</p>
+    </div>
+}

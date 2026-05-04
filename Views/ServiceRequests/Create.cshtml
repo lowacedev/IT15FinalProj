@@ -1,4 +1,4 @@
-@model ITSMS.Models.ServiceRequest
+@model ITSMS.Models.ServiceRequestCreateViewModel
 
 @{
     ViewData["Title"] = "Create Service Request";
@@ -37,7 +37,7 @@
                         <div class="mb-3">
                             <label for="categoryId" class="form-label">Category *</label>
                             <select id="categoryId" name="CategoryId" class="form-select" required>
-                                <option value="">-- Select a category --</option>
+                                <option value=""> Select category </option>
                                 @if (categories != null)
                                 {
                                     @foreach (var category in categories)
@@ -47,6 +47,24 @@
                                 }
                             </select>
                         </div>
+
+                        @if (Model.EmployeeAssets != null && Model.EmployeeAssets.Count > 0)
+                        {
+                            <div class="mb-3">
+                                <label for="assetId" class="form-label">Asset (Optional)</label>
+                                <select id="assetId" name="AssetId" class="form-select" asp-items="Model.EmployeeAssets">
+                                    <option value=""> Select asset </option>
+                                </select>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-3">
+                                <div class="alert alert-info" role="alert">
+                                    <small>No assigned assets available (General Request)</small>
+                                </div>
+                            </div>
+                        }
 
                         <div class="mb-3">
                             <label for="description" class="form-label">Description *</label>

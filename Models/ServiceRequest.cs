@@ -11,9 +11,8 @@ namespace ITSMS.Models
         [Key]
         public int RequestId { get; set; }
 
-        [Required]
         [StringLength(20)]
-        public string RequestNumber { get; set; } // e.g., REQ-001, REQ-002
+        public string? RequestNumber { get; set; } // e.g., REQ-001, REQ-002 - Auto-generated
 
         [Required]
         [StringLength(150, MinimumLength = 5)]
@@ -31,8 +30,12 @@ namespace ITSMS.Models
 
         public int? AssignedTechnicianId { get; set; } // Nullable - assigned later
 
+        public int? AssetId { get; set; } // Nullable ERP integration
+
+        public int? EmployeeId { get; set; } // Nullable ERP integration
+
         [Required]
-        public ServiceRequestStatus Status { get; set; } = ServiceRequestStatus.Open;
+        public ServiceRequestStatus Status { get; set; } = ServiceRequestStatus.Pending;
 
         [Required]
         public ServiceRequestPriority Priority { get; set; } = ServiceRequestPriority.Medium;
@@ -47,17 +50,23 @@ namespace ITSMS.Models
 
         // Navigation properties
         [ForeignKey("CategoryId")]
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
 
         [ForeignKey("RequestorId")]
-        public User Requestor { get; set; }
+        public User? Requestor { get; set; }
 
         [ForeignKey("AssignedTechnicianId")]
-        public User AssignedTechnician { get; set; }
+        public User? AssignedTechnician { get; set; }
+
+        [ForeignKey("AssetId")]
+        public Asset? Asset { get; set; }
+
+        [ForeignKey("EmployeeId")]
+        public Employee? Employee { get; set; }
 
         public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 
-        public Feedback Feedback { get; set; }
+        public Feedback? Feedback { get; set; }
     }
 
     /// <summary>
@@ -65,13 +74,13 @@ namespace ITSMS.Models
     /// </summary>
     public enum ServiceRequestStatus
     {
-        Open = 1,
+        Pending = 0,
         [Display(Name = "In Progress")]
-        InProgress = 2,
+        InProgress = 1,
         [Display(Name = "On Hold")]
-        OnHold = 3,
-        Resolved = 4,
-        Closed = 5
+        OnHold = 2,
+        Resolved = 3,
+        Closed = 4
     }
 
     /// <summary>

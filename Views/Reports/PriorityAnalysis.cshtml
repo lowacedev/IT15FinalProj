@@ -1,0 +1,104 @@
+@{
+    ViewData["Title"] = "Priority Analysis";
+}
+@using System.Dynamic
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Service Request Analysis by Priority</h2>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model == null || Model.Count() == 0)
+    {
+        <div class="alert alert-info">
+            <p>No priority analysis data available.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row mb-4">
+            @if (Model is System.Collections.IEnumerable list)
+            {
+                @foreach (dynamic item in list)
+                {
+                    var cardClass = item.Priority == "Critical" ? "danger" : 
+                                   (item.Priority == "High" ? "warning" : 
+                                   (item.Priority == "Medium" ? "info" : "success"));
+
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-@cardClass h-100">
+                            <div class="card-header bg-@cardClass text-white">
+                                <h5 class="mb-0">@item.Priority Priority</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <div class="stat">
+                                            <h6 class="text-muted">Total Requests</h6>
+                                            <h3 class="mb-0">@item.Total</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat">
+                                            <h6 class="text-muted">Open</h6>
+                                            <h3 class="mb-0 text-warning">@item.Open</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <div class="stat">
+                                            <h6 class="text-muted">In Progress</h6>
+                                            <h3 class="mb-0 text-info">@item.InProgress</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat">
+                                            <h6 class="text-muted">Resolved</h6>
+                                            <h3 class="mb-0 text-success">@item.Resolved</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="stat">
+                                            <h6 class="text-muted">Avg Resolution Time (Hours)</h6>
+                                            <h4 class="mb-0">
+                                                @if (double.IsNaN(item.AvgResolutionTime) || item.AvgResolutionTime == 0)
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@Math.Round(item.AvgResolutionTime, 2)</span>
+                                                }
+                                            </h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="@Url.Action("Dashboard", "Reports")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>

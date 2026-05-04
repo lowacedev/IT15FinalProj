@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "Category Analysis";
+}
+@using System.Dynamic
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Service Request Analysis by Category</h2>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model == null || Model.Count() == 0)
+    {
+        <div class="alert alert-info">
+            <p>No category analysis data available.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Category</th>
+                        <th>Total</th>
+                        <th>Open</th>
+                        <th>In Progress</th>
+                        <th>Resolved</th>
+                        <th>Closed</th>
+                        <th>Avg Resolution Time (Hours)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model is System.Collections.IEnumerable list)
+                    {
+                        @foreach (dynamic item in list)
+                        {
+                            <tr>
+                                <td><strong>@item.Category</strong></td>
+                                <td>
+                                    <span class="badge bg-primary">@item.Total</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning">@item.Open</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@item.InProgress</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">@item.Resolved</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">@item.Closed</span>
+                                </td>
+                                <td>
+                                    @if (double.IsNaN(item.AvgResolutionTime) || item.AvgResolutionTime == 0)
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                    else
+                                    {
+                                        <strong>@Math.Round(item.AvgResolutionTime, 2)</strong>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="@Url.Action("Dashboard", "Reports")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
