@@ -1,0 +1,114 @@
+@model ITSMS.Models.User
+
+@{
+    ViewData["Title"] = "Deactivate User";
+}
+
+<style>
+    .details-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    .details-header {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .details-header h1 {
+        font-weight: 700;
+        margin-bottom: 0;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .details-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border-top: 4px solid #ef4444;
+    }
+
+    .details-card-body {
+        padding: 2rem;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<div class="details-container">
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="details-header">
+            <h1><i class="bi bi-person-x"></i> Deactivate User</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="alert alert-warning shadow-sm">
+                    <h5><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Are you sure you want to deactivate this user?</h5>
+                    <p class="mb-0">Deactivating this user will prevent them from logging into the system. This action can be reversed later by reactivating the user.</p>
+                </div>
+
+                <div class="details-card">
+                    <div class="details-card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-label">Username</div>
+                                <div class="info-value">@Model.Username</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-label">Full Name</div>
+                                <div class="info-value">@Model.FirstName @Model.LastName</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-label">Email</div>
+                                <div class="info-value">@Model.Email</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-label">Current Role</div>
+                                <div class="info-value">@(Model.Role?.RoleName ?? "None")</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <form asp-action="Deactivate" method="post">
+                            <input type="hidden" name="id" value="@Model.UserId" />
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-lock-fill"></i> Confirm Deactivation
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg ms-2">
+                                Cancel
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -26,7 +26,7 @@
                                     _ => "bg-light text-dark"
                                 };
                             }
-                            <span class="badge @statusClass fs-6">@Model.Status</span>
+                            <span id="status-badge" class="badge @statusClass fs-6">@Model.Status</span>
                         </div>
                         <div class="col-md-6">
                             <p><strong>Priority:</strong></p>
@@ -125,6 +125,12 @@
                 </div>
             }
 
+            <!-- Comments Thread -->
+            @await Html.PartialAsync("_CommentThread", Model.Comments)
+            
+            <!-- Comment Form -->
+            @await Html.PartialAsync("_CommentForm")
+
             <!-- Feedback -->
             @if (Model.Feedback != null)
             {
@@ -164,7 +170,14 @@
                 <div class="card-header bg-secondary text-white">
                     <h5>Actions</h5>
                 </div>
-                <div class="card-body d-grid gap-2">
+                <div id="sidebar-actions-container" class="card-body d-grid gap-2">
+                    @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin") || User.IsInRole("Technician"))
+                    {
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#logCostModal">
+                            <i class="bi bi-cash"></i> Log Cost
+                        </button>
+                    }
+
                     @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
                     {
                         @if (Model.Status != ITSMS.Models.ServiceRequestStatus.Closed)
@@ -208,6 +221,50 @@
     </div>
 </div>
 
+<!-- Log Cost Modal -->
+<div class="modal fade" id="logCostModal" tabindex="-1" aria-labelledby="logCostModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-controller="ServiceRequests" asp-action="LogCost" method="post">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="logCostModalLabel">Log Operational Cost</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="requestId" value="@Model.RequestId" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Transaction Type</label>
+                        <select name="transactionType" class="form-select" required>
+                            <option value="1">Repair</option>
+                            <option value="2">Purchase</option>
+                            <option value="3">Maintenance</option>
+                            <option value="4">Upgrade</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" name="amount" class="form-control" step="0.01" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description</label>
+                        <textarea name="description" class="form-control" rows="3" required placeholder="e.g. Replacement parts cost"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Cost</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <style>
     .timeline-item {
         border-left: 3px solid #dee2e6;
@@ -215,3 +272,7 @@
         margin-left: 10px;
     }
 </style>
+
+@section Scripts {
+    <script type="module" src="~/js/comments.js"></script>
+}

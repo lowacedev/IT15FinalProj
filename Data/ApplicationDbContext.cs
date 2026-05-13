@@ -21,13 +21,16 @@ namespace ITSMS.Data
         public DbSet<Assignment> Assignments { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<ActivityLog> ActivityLogs { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         // ERP Modules
         public DbSet<Department> Departments { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Asset> Assets { get; set; }
         public DbSet<AssetAssignment> AssetAssignments { get; set; }
-
+        public DbSet<TicketComment> TicketComments { get; set; }
+        public DbSet<FinanceTransaction> FinanceTransactions { get; set; }
+        public DbSet<Payroll> Payrolls { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -86,8 +89,8 @@ namespace ITSMS.Data
                     PhoneNumber = "",
                     RoleId = 4,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 };
                 superAdminUser.PasswordHash = passwordHasher.HashPassword(superAdminUser, "superadmin123");
                 entity.HasData(superAdminUser);
@@ -304,6 +307,76 @@ namespace ITSMS.Data
                 entity.HasOne(a => a.Employee)
                     .WithMany(emp => emp.AssetAssignments)
                     .HasForeignKey(a => a.EmployeeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Ticket Comment Configuration
+            modelBuilder.Entity<TicketComment>(entity =>
+            {
+                entity.HasKey(e => e.CommentId);
+                entity.ToTable("ticketcomments"); // Lowercase as per user instruction
+                entity.Property(e => e.Body).HasColumnType("longtext");
+                entity.Property(e => e.IsInternal).HasColumnType("tinyint(1)"); // Or just bool, EF core to pomelo does tinyint(1)
+                
+                entity.HasOne(tc => tc.ServiceRequest)
+                    .WithMany(sr => sr.Comments)
+                    .HasForeignKey(tc => tc.RequestId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(tc => tc.Author)
+                    .WithMany()
+                    .HasForeignKey(tc => tc.AuthorId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ======================== FINANCE & PAYROLL CONFIGURATION ========================
+            modelBuilder.Entity<FinanceTransaction>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.HasOne(ft => ft.ServiceRequest)
+                    .WithMany()
+                    .HasForeignKey(ft => ft.ServiceRequestId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(ft => ft.Asset)
+                    .WithMany()
+                    .HasForeignKey(ft => ft.AssetId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(ft => ft.Department)
+                    .WithMany()
+                    .HasForeignKey(ft => ft.DepartmentId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(ft => ft.CreatedByUser)
+                    .WithMany()
+                    .HasForeignKey(ft => ft.CreatedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Payroll>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(p => p.Employee)
+                    .WithMany()
+                    .HasForeignKey(p => p.EmployeeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ======================== AUDIT LOG CONFIGURATION ========================
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Action).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Module).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(a => a.User)
+                    .WithMany()
+                    .HasForeignKey(a => a.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

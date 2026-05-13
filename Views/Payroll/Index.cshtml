@@ -1,0 +1,189 @@
+@model IEnumerable<ITSMS.Models.Payroll>
+
+@{
+    ViewData["Title"] = "Payroll Management";
+}
+
+<style>
+    .details-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    .details-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .details-header h1 {
+        font-weight: 700;
+        margin-bottom: 0;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .details-table-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .details-table {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    .details-table thead {
+        background: #f3f4f6;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .details-table thead th {
+        font-weight: 600;
+        color: #374151;
+        padding: 1rem;
+        border: none;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .details-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .details-table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .details-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+    
+    .status-paid {
+        color: #166534;
+    }
+    
+    .status-pending {
+        color: #92400e;
+    }
+</style>
+
+<div class="details-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="details-header">
+            <h1>
+                <i class="bi bi-person-lines-fill"></i> Payroll Management
+            </h1>
+            <div>
+                <a href="@Url.Action("ExportMonthlySummaryPdf", "Payroll")" class="btn btn-light text-primary fw-bold me-2" target="_blank">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export Summary PDF
+                </a>
+                <a asp-action="Create" class="btn btn-success me-2"><i class="bi bi-plus-circle me-1"></i> Generate Payroll</a>
+                <a asp-controller="Finance" asp-action="Dashboard" class="btn btn-light"><i class="bi bi-arrow-left"></i> Back to Finance</a>
+            </div>
+        </div>
+
+        <div class="details-table-card">
+            <div class="table-header">
+                <div>
+                    <i class="bi bi-table"></i> Payroll Records
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table details-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Month</th>
+                            <th>Basic Salary</th>
+                            <th>Allowance</th>
+                            <th>Deduction</th>
+                            <th>Net Salary</th>
+                            <th style="text-align: center;">Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model) {
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark">@item.Employee?.User?.FirstName @item.Employee?.User?.LastName</div>
+                                <div class="text-muted" style="font-size: 0.8rem;">@item.Employee?.EmployeeNumber</div>
+                            </td>
+                            <td>@item.PayrollMonth</td>
+                            <td>@item.BasicSalary.ToString("C")</td>
+                            <td>@item.Allowance.ToString("C")</td>
+                            <td class="text-danger">@item.Deduction.ToString("C")</td>
+                            <td class="fw-bold text-success">@item.NetSalary.ToString("C")</td>
+                            <td style="text-align: center;">
+                                @if (item.PayrollStatus == ITSMS.Models.PayrollStatus.Paid)
+                                {
+                                    <span class="status-badge status-paid">Paid</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-pending">Pending</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="@Url.Action("ExportEmployeeHistoryPdf", "Payroll", new { id = item.EmployeeId })" class="btn btn-outline-info" title="Export History PDF" target="_blank"><i class="bi bi-file-earmark-pdf"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Details"><i class="bi bi-eye"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1"></i>
+                                    <p class="mt-2 mb-0">No payroll records found.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

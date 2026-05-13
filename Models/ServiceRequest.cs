@@ -40,9 +40,9 @@ namespace ITSMS.Models
         [Required]
         public ServiceRequestPriority Priority { get; set; } = ServiceRequestPriority.Medium;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
         public DateTime? ResolvedAt { get; set; }
 
@@ -67,6 +67,8 @@ namespace ITSMS.Models
         public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 
         public Feedback? Feedback { get; set; }
+        
+        public ICollection<TicketComment> Comments { get; set; } = new List<TicketComment>();
     }
 
     /// <summary>

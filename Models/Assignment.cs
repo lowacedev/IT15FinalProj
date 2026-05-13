@@ -21,7 +21,7 @@ namespace ITSMS.Models
         [Required]
         public int AssignedBy { get; set; } // Admin/Manager who made assignment
 
-        public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
+        public DateTime AssignedAt { get; set; } = DateTime.Now;
 
         [Required]
         public bool IsActive { get; set; } = true; // Current assignment = true, reassigned = false

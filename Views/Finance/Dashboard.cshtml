@@ -1,0 +1,286 @@
+@model IEnumerable<ITSMS.Models.FinanceTransaction>
+
+@{
+    ViewData["Title"] = "Finance Dashboard";
+}
+
+<style>
+    .dashboard-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dashboard-header h1 {
+        font-weight: 700;
+        margin-bottom: 0;
+        font-size: 2.5rem;
+    }
+
+    .kpi-card {
+        background: white;
+        border: none;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .kpi-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .kpi-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1;
+    }
+
+    .kpi-icon {
+        font-size: 2rem;
+        margin-bottom: 0.25rem;
+        opacity: 0.8;
+    }
+
+    .kpi-icon.primary { color: #667eea; }
+    .kpi-icon.success { color: #10b981; }
+    .kpi-icon.warning { color: #f59e0b; }
+    .kpi-icon.danger { color: #ef4444; }
+
+    .kpi-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1;
+        text-align: right;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-body {
+        padding: 1.5rem;
+    }
+
+    .details-table {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    .details-table thead {
+        background: #f3f4f6;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .details-table thead th {
+        font-weight: 600;
+        color: #374151;
+        padding: 1rem;
+        border: none;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .details-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .details-table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .details-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .quick-action-btn {
+        display: block;
+        border-radius: 8px;
+        padding: 0.75rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-bottom: 0.75rem;
+        text-align: left;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        text-decoration: none;
+    }
+
+    .quick-action-btn:hover {
+        background-color: #f8f9fa;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="container-fluid">
+        
+        <div class="dashboard-header">
+            <h1><i class="bi bi-wallet2"></i> Finance Dashboard</h1>
+            <a asp-action="Transactions" class="btn btn-light"><i class="bi bi-list-ul"></i> View All Transactions</a>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-icon primary"><i class="bi bi-cash-coin"></i></div>
+                        <div class="kpi-label">Monthly Expenses</div>
+                    </div>
+                    <div class="kpi-value">@ViewBag.TotalMonthlyExpenses?.ToString("C")</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-icon success"><i class="bi bi-people"></i></div>
+                        <div class="kpi-label">Payroll Expenses</div>
+                    </div>
+                    <div class="kpi-value">@ViewBag.TotalPayrollExpenses?.ToString("C")</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-icon warning"><i class="bi bi-clock-history"></i></div>
+                        <div class="kpi-label">Pending Payroll</div>
+                    </div>
+                    <div class="kpi-value">@ViewBag.PendingPayrollCount</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-icon danger"><i class="bi bi-building"></i></div>
+                        <div class="kpi-label">Top Department</div>
+                        <small class="text-muted" style="margin-top:-5px; margin-bottom:5px;">@ViewBag.TopDepartmentName</small>
+                    </div>
+                    <div class="kpi-value">@ViewBag.TopDepartmentTotal?.ToString("C")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="bi bi-clock-history"></i> Recent Transactions
+                    </div>
+                    <div class="section-body p-0">
+                        <div class="table-responsive">
+                            <table class="table details-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Department</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@item.TransactionDate.ToShortDateString()</td>
+                                            <td><span class="badge text-secondary">@item.TransactionType</span></td>
+                                            <td>@(item.Department?.Name ?? "N/A")</td>
+                                            <td class="text-danger fw-bold">@item.Amount.ToString("C")</td>
+                                        </tr>
+                                    }
+                                    @if (!Model.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4 text-muted">
+                                                <i class="bi bi-inbox fs-2"></i>
+                                                <p class="mt-2 mb-0">No recent transactions found.</p>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="bi bi-lightning"></i> Quick Actions
+                    </div>
+                    <div class="section-body">
+                        <a asp-action="Create" class="quick-action-btn">
+                            <i class="bi bi-cash-coin text-warning me-2"></i> Add Transaction
+                        </a>
+                        <a asp-controller="Payroll" asp-action="Create" class="quick-action-btn">
+                            <i class="bi bi-plus-circle text-success me-2"></i> Generate Payroll
+                        </a>
+                        <a asp-action="Reports" class="quick-action-btn">
+                            <i class="bi bi-graph-up text-info me-2"></i> Financial Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

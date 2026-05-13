@@ -29,7 +29,7 @@ namespace ITSMS.Models
         [StringLength(50)]
         public string IPAddress { get; set; }
 
-        public DateTime LoggedAt { get; set; } = DateTime.UtcNow;
+        public DateTime LoggedAt { get; set; } = DateTime.Now;
 
         // Navigation property
         [ForeignKey("UserId")]

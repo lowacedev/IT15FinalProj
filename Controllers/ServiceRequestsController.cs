@@ -16,14 +16,18 @@ namespace ITSMS.Controllers
     public class ServiceRequestsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ITSMS.Services.NotificationService _notificationService;
+        private readonly ITSMS.Services.AuditService _auditService;
         private const string AdminRole = "Admin";
         private const string SuperAdminRole = "SuperAdmin";
         private const string TechnicianRole = "Technician";
         private const string EmployeeRole = "Employee";
 
-        public ServiceRequestsController(ApplicationDbContext context)
+        public ServiceRequestsController(ApplicationDbContext context, ITSMS.Services.NotificationService notificationService, ITSMS.Services.AuditService auditService)
         {
             _context = context;
+            _notificationService = notificationService;
+            _auditService = auditService;
         }
 
         // GET: ServiceRequests/Index (List all requests - filtered by role)
@@ -90,6 +94,8 @@ namespace ITSMS.Controllers
                     .ThenInclude(e => e.User)
                 .Include(sr => sr.Assignments)
                 .Include(sr => sr.Feedback)
+                .Include(sr => sr.Comments.OrderByDescending(c => c.CreatedAt))
+                    .ThenInclude(c => c.Author)
                 .FirstOrDefault(sr => sr.RequestId == id);
 
             if (request == null)
@@ -165,7 +171,7 @@ namespace ITSMS.Controllers
 
             serviceRequest.RequestorId = userId;
             serviceRequest.Status = ServiceRequestStatus.Pending;
-            serviceRequest.CreatedAt = DateTime.UtcNow;
+            serviceRequest.CreatedAt = DateTime.Now;
 
             // Auto-link EmployeeId from User's Employee record
             var employee = _context.Employees.FirstOrDefault(e => e.UserId == userId);
@@ -178,6 +184,9 @@ namespace ITSMS.Controllers
             {
                 _context.ServiceRequests.Add(serviceRequest);
                 await _context.SaveChangesAsync();
+                
+                _auditService.Log(userId, "CREATE", "ServiceRequest", $"Created request {serviceRequest.RequestNumber}");
+                
                 TempData["Success"] = $"Service request {serviceRequest.RequestNumber} created successfully.";
                 return RedirectToAction(nameof(Details), new { id = serviceRequest.RequestId });
             }
@@ -266,6 +275,8 @@ namespace ITSMS.Controllers
 
             try
             {
+                var previousStatus = existingRequest.Status;
+                
                 // Admins and SuperAdmins can update all fields; Technicians can only update Status and Priority
                 if (userRole == AdminRole || userRole == SuperAdminRole)
                 {
@@ -275,16 +286,28 @@ namespace ITSMS.Controllers
 
                 existingRequest.Status = serviceRequest.Status;
                 existingRequest.Priority = serviceRequest.Priority;
-                existingRequest.UpdatedAt = DateTime.UtcNow;
+                existingRequest.UpdatedAt = DateTime.Now;
 
                 // Set ResolvedAt timestamp when status changes to Resolved
-                if (serviceRequest.Status == ServiceRequestStatus.Resolved && existingRequest.Status != ServiceRequestStatus.Resolved)
+                if (serviceRequest.Status == ServiceRequestStatus.Resolved && previousStatus != ServiceRequestStatus.Resolved)
                 {
-                    existingRequest.ResolvedAt = DateTime.UtcNow;
+                    existingRequest.ResolvedAt = DateTime.Now;
                 }
 
                 _context.ServiceRequests.Update(existingRequest);
                 await _context.SaveChangesAsync();
+
+                if (previousStatus != existingRequest.Status)
+                {
+                    _auditService.Log(userId, "UPDATE", "ServiceRequest", $"Changed status to {existingRequest.Status}");
+
+                    await _notificationService.SendStatusNotification(
+                        existingRequest.RequestorId.ToString(),
+                        existingRequest.RequestNumber ?? existingRequest.RequestId.ToString(),
+                        existingRequest.Status.ToString(),
+                        $"Status updated to {existingRequest.Status}."
+                    );
+                }
 
                 TempData["Success"] = "Service request updated successfully.";
                 return RedirectToAction(nameof(Details), new { id = existingRequest.RequestId });
@@ -335,14 +358,53 @@ namespace ITSMS.Controllers
                 return Forbid();
 
             request.Status = ServiceRequestStatus.Closed;
-            request.ClosedAt = DateTime.UtcNow;
-            request.UpdatedAt = DateTime.UtcNow;
+            request.ClosedAt = DateTime.Now;
+            request.UpdatedAt = DateTime.Now;
 
             _context.ServiceRequests.Update(request);
             await _context.SaveChangesAsync();
 
+            await _notificationService.SendStatusNotification(
+                request.RequestorId.ToString(),
+                request.RequestNumber ?? request.RequestId.ToString(),
+                request.Status.ToString(),
+                $"Service request was closed."
+            );
+
             TempData["Success"] = "Service request closed successfully.";
             return RedirectToAction(nameof(Details), new { id = request.RequestId });
+        }
+
+        // POST: ServiceRequests/LogCost
+        [HttpPost("LogCost")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Technician,Admin,SuperAdmin")]
+        public async Task<IActionResult> LogCost(int requestId, decimal amount, FinanceTransactionType transactionType, string description)
+        {
+            var request = _context.ServiceRequests
+                .Include(sr => sr.Employee)
+                .FirstOrDefault(sr => sr.RequestId == requestId);
+            if (request == null)
+                return NotFound();
+
+            var userId = GetCurrentUserId();
+
+            var transaction = new FinanceTransaction
+            {
+                ServiceRequestId = requestId,
+                Amount = amount,
+                TransactionType = transactionType,
+                Description = description,
+                TransactionDate = DateTime.Now,
+                CreatedByUserId = userId,
+                DepartmentId = request.Employee?.DepartmentId // Attempt to auto-tag department if available
+            };
+
+            _context.FinanceTransactions.Add(transaction);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Cost logged successfully to Finance.";
+            return RedirectToAction(nameof(Details), new { id = requestId });
         }
 
         // ==================== HELPER METHODS ====================

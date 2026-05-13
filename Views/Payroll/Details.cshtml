@@ -1,0 +1,52 @@
+@model ITSMS.Models.Payroll
+
+@{
+    ViewData["Title"] = "Payroll Details";
+}
+
+<div class="container mt-4">
+    <h2>Payroll Details</h2>
+    <hr />
+    <div class="card shadow-sm col-md-8">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">@Model.Employee?.User?.FirstName @Model.Employee?.User?.LastName - @Model.PayrollMonth</h5>
+            @if (Model.PayrollStatus == ITSMS.Models.PayrollStatus.Paid)
+            {
+                <span class="badge text-success">Paid</span>
+            }
+            else
+            {
+                <span class="badge text-warning">Pending</span>
+            }
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4">Employee Number</dt>
+                <dd class="col-sm-8">@Model.Employee?.EmployeeNumber</dd>
+                
+                <dt class="col-sm-4">Payroll Month</dt>
+                <dd class="col-sm-8">@Model.PayrollMonth</dd>
+                
+                <dt class="col-sm-4">Basic Salary</dt>
+                <dd class="col-sm-8">@Model.BasicSalary.ToString("C")</dd>
+                
+                <dt class="col-sm-4">Allowance</dt>
+                <dd class="col-sm-8">@Model.Allowance.ToString("C")</dd>
+                
+                <dt class="col-sm-4">Overtime Pay</dt>
+                <dd class="col-sm-8">@Model.OvertimePay.ToString("C")</dd>
+
+                <dt class="col-sm-4">Deduction</dt>
+                <dd class="col-sm-8 text-danger">@Model.Deduction.ToString("C")</dd>
+                
+                <hr class="my-3"/>
+                <dt class="col-sm-4 h5">Net Salary</dt>
+                <dd class="col-sm-8 h5 text-success">@Model.NetSalary.ToString("C")</dd>
+            </dl>
+        </div>
+        <div class="card-footer bg-light">
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>

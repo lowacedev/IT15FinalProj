@@ -21,7 +21,7 @@ namespace ITSMS.Models
         [Required]
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Navigation property
         public ICollection<ServiceRequest> ServiceRequests { get; set; } = new List<ServiceRequest>();

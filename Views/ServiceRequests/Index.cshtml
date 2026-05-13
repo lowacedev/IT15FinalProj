@@ -124,22 +124,18 @@
     }
 
     .priority-low {
-        background: #dbeafe;
         color: #0369a1;
     }
 
     .priority-medium {
-        background: #fef3c7;
         color: #92400e;
     }
 
     .priority-high {
-        background: #fed7aa;
         color: #9a3412;
     }
 
     .priority-critical {
-        background: #fee2e2;
         color: #991b1b;
     }
 
@@ -153,22 +149,18 @@
     }
 
     .status-pending {
-        background: #fef3c7;
         color: #92400e;
     }
 
     .status-inprogress {
-        background: #bfdbfe;
         color: #1e40af;
     }
 
     .status-resolved {
-        background: #dcfce7;
         color: #166534;
     }
 
     .status-closed {
-        background: #e5e7eb;
         color: #374151;
     }
 
@@ -233,7 +225,7 @@
             </div>
             @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin") || User.IsInRole("Employee"))
             {
-                <a href="@Url.Action("Create", "ServiceRequests")" class="btn btn-light new-request-btn">
+                <a href="@Url.Action("Create", "ServiceRequests")" class="btn btn-success new-request-btn">
                     <i class="bi bi-plus-circle"></i> New Request
                 </a>
             }
@@ -273,14 +265,13 @@
                                 <th style="text-align: center;">Status</th>
                                 <th>Technician</th>
                                 <th>Created</th>
-                                <th>Days Open</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var request in Model)
                             {
-                                var daysOpen = (int)(DateTime.UtcNow - request.CreatedAt).TotalDays;
+                                var daysOpen = (int)(DateTime.Now - request.CreatedAt).TotalDays;
                                 <tr>
                                     <!-- Request Number -->
                                     <td>
@@ -344,13 +335,6 @@
                                     <td>
                                         <div>@request.CreatedAt.ToString("MM/dd/yyyy")</div>
                                         <div class="small-text">@request.CreatedAt.ToString("hh:mm tt")</div>
-                                    </td>
-
-                                    <!-- Days Open -->
-                                    <td>
-                                        <span class="badge @(daysOpen > 7 ? "bg-danger" : daysOpen > 3 ? "bg-warning" : "bg-success")">
-                                            @daysOpen day@(daysOpen != 1 ? "s" : "")
-                                        </span>
                                     </td>
 
                                     <!-- Actions -->

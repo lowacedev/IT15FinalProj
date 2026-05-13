@@ -35,6 +35,12 @@ namespace ITSMS.Models
         public int ClosedRequests { get; set; }
         public int CriticalRequests { get; set; }
         public double AverageResolutionTime { get; set; }
+
+        // ========== PAGINATION ==========
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public int PageSize { get; set; } = 10;
+        public int TotalCount { get; set; }
     }
 
     /// <summary>
@@ -108,7 +114,7 @@ namespace ITSMS.Models
         {
             get
             {
-                var endDate = ClosedAt ?? ResolvedAt ?? DateTime.UtcNow;
+                var endDate = ClosedAt ?? ResolvedAt ?? DateTime.Now;
                 return (int)(endDate - CreatedAt).TotalDays;
             }
         }

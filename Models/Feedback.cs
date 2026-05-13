@@ -25,7 +25,7 @@ namespace ITSMS.Models
         [Required]
         public int ProvidedBy { get; set; }
 
-        public DateTime ProvidedAt { get; set; } = DateTime.UtcNow;
+        public DateTime ProvidedAt { get; set; } = DateTime.Now;
 
         // Navigation properties (nullable to exclude from validation)
         [ForeignKey("RequestId")]

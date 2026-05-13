@@ -15,10 +15,12 @@ namespace ITSMS.Controllers
     public class AssignmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ITSMS.Services.AuditService _auditService;
 
-        public AssignmentsController(ApplicationDbContext context)
+        public AssignmentsController(ApplicationDbContext context, ITSMS.Services.AuditService auditService)
         {
             _context = context;
+            _auditService = auditService;
         }
 
         // GET: Assignments/Assign/5
@@ -78,18 +80,20 @@ namespace ITSMS.Controllers
                 RequestId = requestId,
                 TechnicianId = technicianId,
                 AssignedBy = userId,
-                AssignedAt = DateTime.UtcNow,
+                AssignedAt = DateTime.Now,
                 IsActive = true,
                 Notes = notes
             };
 
             request.AssignedTechnicianId = technicianId;
             request.Status = ServiceRequestStatus.InProgress;
-            request.UpdatedAt = DateTime.UtcNow;
+            request.UpdatedAt = DateTime.Now;
 
             _context.Assignments.Add(newAssignment);
             _context.ServiceRequests.Update(request);
             await _context.SaveChangesAsync();
+
+            _auditService.Log(userId, "ASSIGN", "ServiceRequest", $"Assigned to technician {technician.FullName}");
 
             TempData["Success"] = $"Service request assigned to {technician.FullName}.";
             return RedirectToAction("Details", "ServiceRequests", new { id = requestId });
@@ -129,18 +133,20 @@ namespace ITSMS.Controllers
                 RequestId = requestId,
                 TechnicianId = technicianId,
                 AssignedBy = userId,
-                AssignedAt = DateTime.UtcNow,
+                AssignedAt = DateTime.Now,
                 IsActive = true,
                 Notes = "Quick assignment from dashboard"
             };
 
             request.AssignedTechnicianId = technicianId;
             request.Status = ServiceRequestStatus.InProgress;
-            request.UpdatedAt = DateTime.UtcNow;
+            request.UpdatedAt = DateTime.Now;
 
             _context.Assignments.Add(newAssignment);
             _context.ServiceRequests.Update(request);
             await _context.SaveChangesAsync();
+
+            _auditService.Log(userId, "ASSIGN", "ServiceRequest", $"Assigned to technician {technician.FullName}");
 
             return Ok(new { 
                 success = true,

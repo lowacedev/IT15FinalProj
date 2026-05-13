@@ -25,6 +25,22 @@ namespace ITSMS.Models
         [Required]
         public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
 
+        [StringLength(20)]
+        [Display(Name = "Employee Number")]
+        public string? EmployeeNumber { get; set; }
+
+        [DataType(DataType.Date)]
+        [Display(Name = "Hire Date")]
+        public DateTime? HireDate { get; set; }
+
+        [StringLength(50)]
+        [Display(Name = "Employment Status")]
+        public string? EmploymentStatus { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Salary Rate")]
+        public decimal SalaryRate { get; set; }
+
         // Navigation properties
         [ForeignKey("UserId")]
         public User? User { get; set; }

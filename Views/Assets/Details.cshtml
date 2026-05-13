@@ -14,6 +14,9 @@
                 <i class="bi bi-person-plus"></i> Assign Asset
             </a>
         }
+        <button type="button" class="btn btn-warning me-2 text-dark" data-bs-toggle="modal" data-bs-target="#logCostModal">
+            <i class="bi bi-cash"></i> Log Cost
+        </button>
         <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary me-2">
             <i class="bi bi-pencil"></i> Edit
         </a>
@@ -27,6 +30,13 @@
 {
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
@@ -207,6 +217,50 @@
                     </table>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Log Cost Modal -->
+<div class="modal fade" id="logCostModal" tabindex="-1" aria-labelledby="logCostModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-controller="Assets" asp-action="LogCost" method="post">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="logCostModalLabel"><i class="bi bi-cash me-2"></i>Log Asset Cost</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="assetId" value="@Model.Id" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Transaction Type</label>
+                        <select name="transactionType" class="form-select" required>
+                            <option value="3">Maintenance</option>
+                            <option value="1">Repair</option>
+                            <option value="4">Upgrade</option>
+                            <option value="2">Purchase</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" name="amount" class="form-control" step="0.01" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description</label>
+                        <textarea name="description" class="form-control" rows="3" required placeholder="e.g. Annual maintenance contract fee"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning text-dark fw-bold">Save Cost</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -1,0 +1,42 @@
+@model IEnumerable<ITSMS.Models.Payroll>
+@{
+    Layout = "_PdfLayout";
+}
+
+<div style="margin-bottom: 30px;">
+    <h3>Payroll Records Summary</h3>
+    @if (Model != null && Model.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee Name</th>
+                    <th>Payroll Month</th>
+                    <th class="text-right">Basic Salary</th>
+                    <th class="text-right">Allowance</th>
+                    <th class="text-right">Deduction</th>
+                    <th class="text-right">Net Salary</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@(item.Employee?.User?.FullName ?? "N/A")</td>
+                        <td>@item.PayrollMonth</td>
+                        <td class="text-right">@item.BasicSalary.ToString("C")</td>
+                        <td class="text-right">@item.Allowance.ToString("C")</td>
+                        <td class="text-right">@item.Deduction.ToString("C")</td>
+                        <td class="text-right font-weight-bold">@item.NetSalary.ToString("C")</td>
+                        <td>@item.PayrollStatus</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p style="color: #777;">No payroll records found.</p>
+    }
+</div>

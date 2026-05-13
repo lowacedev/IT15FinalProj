@@ -189,6 +189,44 @@ namespace ITSMS.Migrations
                     b.ToTable("Assignments");
                 });
 
+            modelBuilder.Entity("ITSMS.Models.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AuditLogs");
+                });
+
             modelBuilder.Entity("ITSMS.Models.Category", b =>
                 {
                     b.Property<int>("CategoryId")
@@ -226,7 +264,7 @@ namespace ITSMS.Migrations
                         {
                             CategoryId = 1,
                             CategoryName = "Hardware",
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 783, DateTimeKind.Utc).AddTicks(7321),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 30, 64, DateTimeKind.Local).AddTicks(1195),
                             Description = "Hardware related issues and requests",
                             IsActive = true
                         },
@@ -234,7 +272,7 @@ namespace ITSMS.Migrations
                         {
                             CategoryId = 2,
                             CategoryName = "Software",
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 784, DateTimeKind.Utc).AddTicks(764),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 30, 64, DateTimeKind.Local).AddTicks(4072),
                             Description = "Software installation and support",
                             IsActive = true
                         },
@@ -242,7 +280,7 @@ namespace ITSMS.Migrations
                         {
                             CategoryId = 3,
                             CategoryName = "Network",
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 784, DateTimeKind.Utc).AddTicks(780),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 30, 64, DateTimeKind.Local).AddTicks(4090),
                             Description = "Network connectivity issues",
                             IsActive = true
                         },
@@ -250,7 +288,7 @@ namespace ITSMS.Migrations
                         {
                             CategoryId = 4,
                             CategoryName = "Email",
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 784, DateTimeKind.Utc).AddTicks(784),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 30, 64, DateTimeKind.Local).AddTicks(4095),
                             Description = "Email and collaboration tools",
                             IsActive = true
                         },
@@ -258,7 +296,7 @@ namespace ITSMS.Migrations
                         {
                             CategoryId = 5,
                             CategoryName = "Security",
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 784, DateTimeKind.Utc).AddTicks(786),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 30, 64, DateTimeKind.Local).AddTicks(4099),
                             Description = "Security related issues",
                             IsActive = true
                         },
@@ -266,7 +304,7 @@ namespace ITSMS.Migrations
                         {
                             CategoryId = 6,
                             CategoryName = "Other",
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 784, DateTimeKind.Utc).AddTicks(789),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 30, 64, DateTimeKind.Local).AddTicks(4103),
                             Description = "Other miscellaneous requests",
                             IsActive = true
                         });
@@ -332,9 +370,23 @@ namespace ITSMS.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
 
+                    b.Property<string>("EmployeeNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("EmploymentStatus")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("HireDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Position")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<decimal>("SalaryRate")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -393,6 +445,93 @@ namespace ITSMS.Migrations
                     b.ToTable("Feedbacks");
                 });
 
+            modelBuilder.Entity("ITSMS.Models.FinanceTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("AssetId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<int?>("ServiceRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("TransactionType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetId");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("ServiceRequestId");
+
+                    b.ToTable("FinanceTransactions");
+                });
+
+            modelBuilder.Entity("ITSMS.Models.Payroll", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Allowance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("BasicSalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Deduction")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("NetSalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("OvertimePay")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PayrollMonth")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("PayrollStatus")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("Payrolls");
+                });
+
             modelBuilder.Entity("ITSMS.Models.Role", b =>
                 {
                     b.Property<int>("RoleId")
@@ -425,28 +564,28 @@ namespace ITSMS.Migrations
                         new
                         {
                             RoleId = 1,
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 484, DateTimeKind.Utc).AddTicks(9297),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 29, 791, DateTimeKind.Local).AddTicks(3128),
                             Description = "IT Administrator with full access",
                             RoleName = "Admin"
                         },
                         new
                         {
                             RoleId = 2,
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 485, DateTimeKind.Utc).AddTicks(2445),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 29, 794, DateTimeKind.Local).AddTicks(9718),
                             Description = "IT Support Technician",
                             RoleName = "Technician"
                         },
                         new
                         {
                             RoleId = 3,
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 485, DateTimeKind.Utc).AddTicks(2456),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 29, 794, DateTimeKind.Local).AddTicks(9759),
                             Description = "Employee / Requestor",
                             RoleName = "Employee"
                         },
                         new
                         {
                             RoleId = 4,
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 485, DateTimeKind.Utc).AddTicks(2459),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 29, 794, DateTimeKind.Local).AddTicks(9765),
                             Description = "System Super Administrator with unrestricted access",
                             RoleName = "SuperAdmin"
                         });
@@ -541,6 +680,39 @@ namespace ITSMS.Migrations
                     b.ToTable("ServiceRequests");
                 });
 
+            modelBuilder.Entity("ITSMS.Models.TicketComment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsInternal")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("RequestId");
+
+                    b.ToTable("ticketcomments", (string)null);
+                });
+
             modelBuilder.Entity("ITSMS.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -613,15 +785,15 @@ namespace ITSMS.Migrations
                         new
                         {
                             UserId = -1,
-                            CreatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 532, DateTimeKind.Utc).AddTicks(628),
+                            CreatedAt = new DateTime(2026, 5, 11, 19, 36, 29, 836, DateTimeKind.Local).AddTicks(3443),
                             Email = "superadmin@itsms.local",
                             FirstName = "Super",
                             IsActive = true,
                             LastName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEA31Wt1vhrOv8fcB/Lcgk3Fi+nnYER2GJj3V/2imlPavmBknpzg99V55fb+TaKYADw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJss/Y9SZAxlWAwJlyOnu2m8/4ImAXWkJf0St2gmRT/+6uxNj8IanEGySoiFYCcHiA==",
                             PhoneNumber = "",
                             RoleId = 4,
-                            UpdatedAt = new DateTime(2026, 5, 4, 7, 57, 8, 532, DateTimeKind.Utc).AddTicks(1300),
+                            UpdatedAt = new DateTime(2026, 5, 11, 19, 36, 29, 836, DateTimeKind.Local).AddTicks(4134),
                             Username = "superadmin"
                         });
                 });
@@ -684,6 +856,17 @@ namespace ITSMS.Migrations
                     b.Navigation("Technician");
                 });
 
+            modelBuilder.Entity("ITSMS.Models.AuditLog", b =>
+                {
+                    b.HasOne("ITSMS.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ITSMS.Models.Employee", b =>
                 {
                     b.HasOne("ITSMS.Models.Department", "Department")
@@ -720,6 +903,49 @@ namespace ITSMS.Migrations
                     b.Navigation("Request");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ITSMS.Models.FinanceTransaction", b =>
+                {
+                    b.HasOne("ITSMS.Models.Asset", "Asset")
+                        .WithMany()
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ITSMS.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ITSMS.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ITSMS.Models.ServiceRequest", "ServiceRequest")
+                        .WithMany()
+                        .HasForeignKey("ServiceRequestId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Department");
+
+                    b.Navigation("ServiceRequest");
+                });
+
+            modelBuilder.Entity("ITSMS.Models.Payroll", b =>
+                {
+                    b.HasOne("ITSMS.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("ITSMS.Models.ServiceRequest", b =>
@@ -766,6 +992,25 @@ namespace ITSMS.Migrations
                     b.Navigation("Requestor");
                 });
 
+            modelBuilder.Entity("ITSMS.Models.TicketComment", b =>
+                {
+                    b.HasOne("ITSMS.Models.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ITSMS.Models.ServiceRequest", "ServiceRequest")
+                        .WithMany("Comments")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("ServiceRequest");
+                });
+
             modelBuilder.Entity("ITSMS.Models.User", b =>
                 {
                     b.HasOne("ITSMS.Models.Role", "Role")
@@ -809,6 +1054,8 @@ namespace ITSMS.Migrations
             modelBuilder.Entity("ITSMS.Models.ServiceRequest", b =>
                 {
                     b.Navigation("Assignments");
+
+                    b.Navigation("Comments");
 
                     b.Navigation("Feedback");
                 });

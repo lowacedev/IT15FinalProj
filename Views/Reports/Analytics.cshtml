@@ -131,11 +131,18 @@
 <div class="reports-container">
     <div class="container-fluid">
         <!-- Header -->
-        <div class="reports-header">
-            <h1>
-                <i class="bi bi-graph-up"></i> Analytics & Reports
-            </h1>
-            <p>Comprehensive system analytics, charts, and performance metrics</p>
+        <div class="reports-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1>
+                    <i class="bi bi-graph-up"></i> Analytics & Reports
+                </h1>
+                <p>Comprehensive system analytics, charts, and performance metrics</p>
+            </div>
+            <div>
+                <a href="@Url.Action("ExportAnalyticsPdf", "Reports")" class="btn btn-light text-primary fw-bold px-4 py-2 rounded-pill shadow-sm" target="_blank">
+                    <i class="bi bi-file-earmark-pdf-fill me-2"></i> Export PDF
+                </a>
+            </div>
         </div>
 
         @if (TempData["Success"] != null)

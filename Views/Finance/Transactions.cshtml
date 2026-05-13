@@ -1,0 +1,169 @@
+@model IEnumerable<ITSMS.Models.FinanceTransaction>
+
+@{
+    ViewData["Title"] = "Finance Transactions";
+}
+
+<style>
+    .details-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    .details-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .details-header h1 {
+        font-weight: 700;
+        margin-bottom: 0;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .details-table-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .details-table {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    .details-table thead {
+        background: #f3f4f6;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .details-table thead th {
+        font-weight: 600;
+        color: #374151;
+        padding: 1rem;
+        border: none;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .details-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .details-table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .details-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .transaction-type-badge {
+        display: inline-block;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #0369a1;
+    }
+</style>
+
+<div class="details-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="details-header">
+            <h1>
+                <i class="bi bi-cash-stack"></i> Finance Transactions
+            </h1>
+            <div>
+                <a asp-action="Create" class="btn btn-success me-2">
+                    <i class="bi bi-plus-circle"></i> Add Transaction
+                </a>
+                <a asp-action="Dashboard" class="btn btn-light">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="details-table-card">
+            <div class="table-header">
+                <div>
+                    <i class="bi bi-table"></i> Transactions List
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table details-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Transaction Type</th>
+                            <th>Department</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Related Request/Asset</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model) {
+                        <tr>
+                            <td>
+                                <span class="transaction-type-badge">@item.TransactionType</span>
+                            </td>
+                            <td>@(item.Department?.Name ?? "-")</td>
+                            <td class="text-danger fw-bold">@item.Amount.ToString("C")</td>
+                            <td>@item.TransactionDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @if (item.ServiceRequest != null)
+                                {
+                                    <span class="badge text-primary">Req: @item.ServiceRequest.RequestNumber</span>
+                                }
+                                @if (item.Asset != null)
+                                {
+                                    <span class="badge text-secondary">Asset: @item.Asset.AssetTag</span>
+                                }
+                            </td>
+                        </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1"></i>
+                                    <p class="mt-2 mb-0">No transactions recorded yet.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,50 @@
+@model IEnumerable<ITSMS.Models.Payroll>
+@{
+    Layout = "_PdfLayout";
+    var employee = ViewBag.Employee as ITSMS.Models.Employee;
+}
+
+<div style="margin-bottom: 20px;">
+    <h3>Employee Information</h3>
+    <p><strong>Name:</strong> @employee?.User?.FullName</p>
+    <p><strong>Employee Code:</strong> @employee?.EmployeeCode</p>
+    <p><strong>Department:</strong> @employee?.Department?.Name</p>
+</div>
+
+<div style="margin-bottom: 30px;">
+    <h3>Payroll History</h3>
+    @if (Model != null && Model.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Payroll Month</th>
+                    <th class="text-right">Basic Salary</th>
+                    <th class="text-right">Allowance</th>
+                    <th class="text-right">Overtime</th>
+                    <th class="text-right">Deduction</th>
+                    <th class="text-right">Net Salary</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.PayrollMonth</td>
+                        <td class="text-right">@item.BasicSalary.ToString("C")</td>
+                        <td class="text-right">@item.Allowance.ToString("C")</td>
+                        <td class="text-right">@item.OvertimePay.ToString("C")</td>
+                        <td class="text-right text-danger">@item.Deduction.ToString("C")</td>
+                        <td class="text-right font-weight-bold text-success">@item.NetSalary.ToString("C")</td>
+                        <td>@item.PayrollStatus</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p style="color: #777;">No payroll history records found for this employee.</p>
+    }
+</div>

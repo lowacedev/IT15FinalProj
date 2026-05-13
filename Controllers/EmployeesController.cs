@@ -11,10 +11,12 @@ namespace ITSMS.Controllers
     public class EmployeesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ITSMS.Services.AuditService _auditService;
 
-        public EmployeesController(ApplicationDbContext context)
+        public EmployeesController(ApplicationDbContext context, ITSMS.Services.AuditService auditService)
         {
             _context = context;
+            _auditService = auditService;
         }
 
         // GET: Employees
@@ -103,7 +105,7 @@ namespace ITSMS.Controllers
         // POST: Employees/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,UserId,DepartmentId,Position,EmployeeCode,Status")] Employee employee)
+        public async Task<IActionResult> Create([Bind("Id,UserId,DepartmentId,Position,EmployeeCode,Status,EmployeeNumber,HireDate,EmploymentStatus,SalaryRate")] Employee employee)
         {
             if (ModelState.IsValid)
             {
@@ -116,6 +118,9 @@ namespace ITSMS.Controllers
 
                 _context.Add(employee);
                 await _context.SaveChangesAsync();
+
+                _auditService.Log(GetCurrentUserId(), "CREATE", "Employee", $"Created employee {employee.EmployeeCode}");
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -152,7 +157,7 @@ namespace ITSMS.Controllers
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,DepartmentId,Position,EmployeeCode,Status")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,DepartmentId,Position,EmployeeCode,Status,EmployeeNumber,HireDate,EmploymentStatus,SalaryRate")] Employee employee)
         {
             if (id != employee.Id)
             {
@@ -165,6 +170,8 @@ namespace ITSMS.Controllers
                 {
                     _context.Update(employee);
                     await _context.SaveChangesAsync();
+
+                    _auditService.Log(GetCurrentUserId(), "UPDATE", "Employee", $"Updated employee {employee.EmployeeCode}");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -186,6 +193,12 @@ namespace ITSMS.Controllers
         private bool EmployeeExists(int id)
         {
             return _context.Employees.Any(e => e.Id == id);
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            return int.TryParse(userIdClaim?.Value, out var userId) ? userId : 0;
         }
     }
 }

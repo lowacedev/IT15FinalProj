@@ -69,7 +69,7 @@ namespace ITSMS.Controllers
                 return Forbid();
 
             feedback.ProvidedBy = userId;
-            feedback.ProvidedAt = DateTime.UtcNow;
+            feedback.ProvidedAt = DateTime.Now;
 
             if (ModelState.IsValid)
             {
@@ -77,8 +77,8 @@ namespace ITSMS.Controllers
                 
                 // Auto-close the request when feedback is submitted
                 request.Status = ServiceRequestStatus.Closed;
-                request.ClosedAt = DateTime.UtcNow;
-                request.UpdatedAt = DateTime.UtcNow;
+                request.ClosedAt = DateTime.Now;
+                request.UpdatedAt = DateTime.Now;
                 _context.ServiceRequests.Update(request);
                 
                 await _context.SaveChangesAsync();

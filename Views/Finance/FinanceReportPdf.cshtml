@@ -1,0 +1,62 @@
+@{
+    Layout = "_PdfLayout";
+    
+    var expensesByDept = ViewBag.ExpensesByDept as IEnumerable<dynamic>;
+    var payrollSummary = ViewBag.PayrollSummary as IEnumerable<dynamic>;
+}
+
+<div style="margin-bottom: 30px;">
+    <h3>Expenses by Department</h3>
+    @if (expensesByDept != null && expensesByDept.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th class="text-right">Total Expenses</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in expensesByDept)
+                {
+                    <tr>
+                        <td>@item.DepartmentName</td>
+                        <td class="text-right font-weight-bold">@(((decimal)item.Total).ToString("C"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p style="color: #777;">No expense records found.</p>
+    }
+</div>
+
+<div style="margin-bottom: 30px;">
+    <h3>Monthly Payroll Summary (Paid)</h3>
+    @if (payrollSummary != null && payrollSummary.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th class="text-right">Total Payroll</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in payrollSummary)
+                {
+                    <tr>
+                        <td>@item.MonthName</td>
+                        <td class="text-right text-success font-weight-bold">@(((decimal)item.Total).ToString("C"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p style="color: #777;">No payroll records found.</p>
+    }
+</div>

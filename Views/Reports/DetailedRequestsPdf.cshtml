@@ -1,0 +1,35 @@
+@model ITSMS.Models.ReportsViewModel
+@{
+    Layout = "_PdfLayout";
+}
+
+<div style="margin-bottom: 30px;">
+    <h3>Service Requests Detail Report</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Request #</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Assigned Tech</th>
+                <th>Date Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var req in Model.ServiceRequestDetails)
+            {
+                <tr>
+                    <td>@req.RequestNumber</td>
+                    <td>@req.Title</td>
+                    <td>@req.Category</td>
+                    <td>@req.Priority</td>
+                    <td>@req.Status</td>
+                    <td>@req.AssignedTechnician</td>
+                    <td>@req.CreatedAt.ToString("MMM dd, yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

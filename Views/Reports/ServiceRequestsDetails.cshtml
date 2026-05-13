@@ -175,22 +175,18 @@
     }
 
     .priority-low {
-        background: #dbeafe;
         color: #0369a1;
     }
 
     .priority-medium {
-        background: #fef3c7;
         color: #92400e;
     }
 
     .priority-high {
-        background: #fed7aa;
         color: #9a3412;
     }
 
     .priority-critical {
-        background: #fee2e2;
         color: #991b1b;
     }
 
@@ -204,22 +200,18 @@
     }
 
     .status-pending {
-        background: #fef3c7;
         color: #92400e;
     }
 
     .status-inprogress {
-        background: #bfdbfe;
         color: #1e40af;
     }
 
     .status-resolved {
-        background: #dcfce7;
         color: #166534;
     }
 
     .status-closed {
-        background: #e5e7eb;
         color: #374151;
     }
 
@@ -278,11 +270,18 @@
 <div class="details-container">
     <div class="container-fluid">
         <!-- Header -->
-        <div class="details-header">
-            <h1>
-                <i class="bi bi-list-check"></i> Service Requests - Detailed View
-            </h1>
-            <p>Filter and search through all service requests with detailed information</p>
+        <div class="details-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1>
+                    <i class="bi bi-list-check"></i> Service Requests - Detailed View
+                </h1>
+                <p>Filter and search through all service requests with detailed information</p>
+            </div>
+            <div>
+                <a href="@Url.Action("ExportDetailedRequestsPdf", "Reports", new { status = Model.SelectedStatus, priority = Model.SelectedPriority, search = Model.SearchQuery })" class="btn btn-light text-primary fw-bold px-4 py-2 rounded-pill shadow-sm" target="_blank">
+                    <i class="bi bi-file-earmark-pdf-fill me-2"></i> Export PDF
+                </a>
+            </div>
         </div>
 
         @if (TempData["Success"] != null)
@@ -297,25 +296,25 @@
         <!-- Summary Stats -->
         <div class="row mb-4">
             <div class="col-md-3 col-sm-6 mb-3">
-                <div class="filter-card text-center">
+                <div class="filter-card text-end">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #667eea;">@Model.TotalRequests</div>
                     <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">Total Requests</div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6 mb-3">
-                <div class="filter-card text-center">
+                <div class="filter-card text-end">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #f97316;">@Model.PendingRequests</div>
                     <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">Pending</div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6 mb-3">
-                <div class="filter-card text-center">
+                <div class="filter-card text-end">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #06b6d4;">@Model.InProgressRequests</div>
                     <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">In Progress</div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6 mb-3">
-                <div class="filter-card text-center">
+                <div class="filter-card text-end">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #dc2626;">@Model.CriticalRequests</div>
                     <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">Critical</div>
                 </div>
@@ -444,7 +443,7 @@
                     <i class="bi bi-table"></i> Service Requests
                 </div>
                 <div class="result-count">
-                    Showing @Model.ServiceRequestDetails.Count of @Model.TotalRequests results
+                    Showing @(Model.ServiceRequestDetails.Count > 0 ? (Model.CurrentPage - 1) * Model.PageSize + 1 : 0) to @((Model.CurrentPage - 1) * Model.PageSize + Model.ServiceRequestDetails.Count) of @Model.TotalCount results
                 </div>
             </div>
 
@@ -462,7 +461,6 @@
                                 <th style="text-align: center;">Status</th>
                                 <th>Technician</th>
                                 <th>Created</th>
-                                <th>Days Open</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -523,13 +521,6 @@
                                         <div>@request.CreatedAt.ToString("MM/dd/yyyy")</div>
                                         <div class="small-text">@request.CreatedAt.ToString("hh:mm tt")</div>
                                     </td>
-
-                                    <!-- Days Open -->
-                                    <td>
-                                        <span class="badge @(request.DaysOpen > 7 ? "bg-danger" : request.DaysOpen > 3 ? "bg-warning" : "bg-success")">
-                                            @request.DaysOpen day@(request.DaysOpen != 1 ? "s" : "")
-                                        </span>
-                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -547,6 +538,103 @@
                 </div>
             }
         </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div style="padding: 1.5rem; background: #f9fafb; border-top: 1px solid #e5e7eb; display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination mb-0" style="gap: 0.25rem;">
+                        <!-- Previous Button -->
+                        <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                            @if (Model.CurrentPage > 1)
+                            {
+                                <a class="page-link" href="@Url.Action("ServiceRequestsDetails", new { page = Model.CurrentPage - 1, status = Model.SelectedStatus, priority = Model.SelectedPriority, search = Model.SearchQuery })" 
+                                   style="color: #667eea; border-color: #e5e7eb;">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link" style="color: #d1d5db; border-color: #e5e7eb;">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </span>
+                            }
+                        </li>
+
+                        <!-- Page Numbers -->
+                        @{
+                            int startPage = Math.Max(1, Model.CurrentPage - 2);
+                            int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+
+                            if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("ServiceRequestsDetails", new { page = 1, status = Model.SelectedStatus, priority = Model.SelectedPriority, search = Model.SearchQuery })" 
+                                       style="color: #667eea; border-color: #e5e7eb;">1</a>
+                                </li>
+                                if (startPage > 2)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link" style="border-color: #e5e7eb;">...</span>
+                                    </li>
+                                }
+                            }
+
+                            for (int i = startPage; i <= endPage; i++)
+                            {
+                                if (i == Model.CurrentPage)
+                                {
+                                    <li class="page-item active">
+                                        <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-color: #667eea;">
+                                            @i
+                                        </span>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("ServiceRequestsDetails", new { page = i, status = Model.SelectedStatus, priority = Model.SelectedPriority, search = Model.SearchQuery })" 
+                                           style="color: #667eea; border-color: #e5e7eb;">@i</a>
+                                    </li>
+                                }
+                            }
+
+                            if (endPage < Model.TotalPages)
+                            {
+                                if (endPage < Model.TotalPages - 1)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link" style="border-color: #e5e7eb;">...</span>
+                                    </li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("ServiceRequestsDetails", new { page = Model.TotalPages, status = Model.SelectedStatus, priority = Model.SelectedPriority, search = Model.SearchQuery })" 
+                                       style="color: #667eea; border-color: #e5e7eb;">@Model.TotalPages</a>
+                                </li>
+                            }
+                        }
+
+                        <!-- Next Button -->
+                        <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                            @if (Model.CurrentPage < Model.TotalPages)
+                            {
+                                <a class="page-link" href="@Url.Action("ServiceRequestsDetails", new { page = Model.CurrentPage + 1, status = Model.SelectedStatus, priority = Model.SelectedPriority, search = Model.SearchQuery })" 
+                                   style="color: #667eea; border-color: #e5e7eb;">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link" style="color: #d1d5db; border-color: #e5e7eb;">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </span>
+                            }
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
 
         <!-- Back Button -->
         <div class="mt-4">

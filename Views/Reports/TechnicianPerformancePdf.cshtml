@@ -1,0 +1,33 @@
+@model ITSMS.Models.ReportsViewModel
+@{
+    Layout = "_PdfLayout";
+}
+
+<div style="margin-bottom: 30px;">
+    <h3>Technician Performance Summary</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Technician Name</th>
+                <th class="text-right">Assigned</th>
+                <th class="text-right">Completed</th>
+                <th class="text-right">In Progress</th>
+                <th class="text-right">Pending</th>
+                <th class="text-right">Completion Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tech in Model.TechnicianPerformances)
+            {
+                <tr>
+                    <td>@tech.TechnicianName</td>
+                    <td class="text-right font-weight-bold">@tech.AssignedTickets</td>
+                    <td class="text-right text-success">@tech.CompletedTickets</td>
+                    <td class="text-right text-info">@tech.InProgressTickets</td>
+                    <td class="text-right text-warning">@tech.PendingTickets</td>
+                    <td class="text-right font-weight-bold">@tech.CompletionRate%</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

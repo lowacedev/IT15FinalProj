@@ -39,7 +39,7 @@
         border-radius: 10px;
         padding: 1.5rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        text-align: center;
+        text-align: right;
         border-top: 4px solid #667eea;
         margin-bottom: 1.5rem;
     }
@@ -153,25 +153,20 @@
         justify-content: center;
         min-width: 40px;
         height: 40px;
-        border-radius: 6px;
         font-weight: 600;
         font-size: 0.875rem;
-        background: #f0f9ff;
         color: #0369a1;
     }
 
     .stat-badge.pending {
-        background: #fef3c7;
         color: #92400e;
     }
 
     .stat-badge.in-progress {
-        background: #fef3c7;
         color: #92400e;
     }
 
     .stat-badge.completed {
-        background: #dcfce7;
         color: #166534;
     }
 
@@ -256,11 +251,18 @@
 <div class="performance-container">
     <div class="container-fluid">
         <!-- Header -->
-        <div class="performance-header">
-            <h1>
-                <i class="bi bi-people-fill"></i> Technician Performance
-            </h1>
-            <p>Track individual technician workload, completed tickets, and performance metrics</p>
+        <div class="performance-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1>
+                    <i class="bi bi-people-fill"></i> Technician Performance
+                </h1>
+                <p>Track individual technician workload, completed tickets, and performance metrics</p>
+            </div>
+            <div>
+                <a href="@Url.Action("ExportTechnicianPerformancePdf", "Reports")" class="btn btn-light text-primary fw-bold px-4 py-2 rounded-pill shadow-sm" target="_blank">
+                    <i class="bi bi-file-earmark-pdf-fill me-2"></i> Export PDF
+                </a>
+            </div>
         </div>
 
         @if (TempData["Success"] != null)
@@ -376,10 +378,10 @@
                                         <!-- Last Active -->
                                         <td>
                                             <div class="last-active">
-                                                @if (tech.LastActive > DateTime.UtcNow.AddDays(-7))
+                                                @if (tech.LastActive > DateTime.Now.AddDays(-7))
                                                 {
                                                     <span>
-                                                        @if (tech.LastActive.Date == DateTime.UtcNow.Date)
+                                                        @if (tech.LastActive.Date == DateTime.Now.Date)
                                                         {
                                                             <span>Today</span>
                                                         }

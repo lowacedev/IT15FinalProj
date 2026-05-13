@@ -1,0 +1,70 @@
+@model ITSMS.Models.ReportsViewModel
+@{
+    Layout = "_PdfLayout";
+}
+
+<div style="margin-bottom: 30px;">
+    <h3>Service Request Summary</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Total Requests</th>
+                <th>Pending</th>
+                <th>In Progress</th>
+                <th>Resolved</th>
+                <th>Closed</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="font-weight-bold">@Model.TotalRequests</td>
+                <td class="text-warning font-weight-bold">@Model.PendingRequests</td>
+                <td class="text-info font-weight-bold">@Model.InProgressRequests</td>
+                <td class="text-success font-weight-bold">@Model.ResolvedRequests</td>
+                <td class="font-weight-bold">@Model.ClosedRequests</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div style="margin-bottom: 30px;">
+    <h3>Requests by Category</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th class="text-right">Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.RequestsByCategory)
+            {
+                <tr>
+                    <td>@item.Category</td>
+                    <td class="text-right">@item.Count</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div style="margin-bottom: 30px;">
+    <h3>Requests by Priority</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Priority</th>
+                <th class="text-right">Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.RequestsByPriority)
+            {
+                <tr>
+                    <td>@item.Priority</td>
+                    <td class="text-right">@item.Count</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

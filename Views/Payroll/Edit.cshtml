@@ -1,0 +1,68 @@
+@model ITSMS.Models.Payroll
+
+@{
+    ViewData["Title"] = "Edit Payroll";
+}
+
+<div class="container mt-4">
+    <h2>Edit Payroll</h2>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <div class="mb-3">
+                            <label asp-for="EmployeeId" class="form-label">Employee</label>
+                            <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.EmployeeId"></select>
+                            <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PayrollMonth" class="form-label">Payroll Month</label>
+                            <input asp-for="PayrollMonth" class="form-control" />
+                            <span asp-validation-for="PayrollMonth" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="BasicSalary" class="form-label">Basic Salary</label>
+                            <input asp-for="BasicSalary" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="BasicSalary" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Allowance" class="form-label">Allowance</label>
+                            <input asp-for="Allowance" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="Allowance" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Deduction" class="form-label">Deduction</label>
+                            <input asp-for="Deduction" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="Deduction" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="OvertimePay" class="form-label">Overtime Pay</label>
+                            <input asp-for="OvertimePay" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="OvertimePay" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PayrollStatus" class="form-label">Status</label>
+                            <select asp-for="PayrollStatus" class="form-select">
+                                <option value="0">Pending</option>
+                                <option value="1">Paid</option>
+                            </select>
+                            <span asp-validation-for="PayrollStatus" class="text-danger"></span>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

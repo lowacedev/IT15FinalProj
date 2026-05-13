@@ -16,11 +16,13 @@ namespace ITSMS.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly PasswordHasher<User> _passwordHasher;
+        private readonly ITSMS.Services.AuditService _auditService;
 
-        public UsersController(ApplicationDbContext context)
+        public UsersController(ApplicationDbContext context, ITSMS.Services.AuditService auditService)
         {
             _context = context;
             _passwordHasher = new PasswordHasher<User>();
+            _auditService = auditService;
         }
 
         // GET: Users/Index
@@ -112,11 +114,13 @@ namespace ITSMS.Controllers
             {
                 user.PasswordHash = _passwordHasher.HashPassword(user, password);
                 user.IsActive = true;
-                user.CreatedAt = DateTime.UtcNow;
-                user.UpdatedAt = DateTime.UtcNow;
+                user.CreatedAt = DateTime.Now;
+                user.UpdatedAt = DateTime.Now;
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
+
+                _auditService.Log(GetCurrentUserId(), "CREATE", "User", $"Created user {user.Username}");
 
                 TempData["Success"] = $"User {user.Username} created successfully.";
                 return RedirectToAction(nameof(Index));
@@ -157,13 +161,15 @@ namespace ITSMS.Controllers
                 existingUser.LastName = user.LastName;
                 existingUser.PhoneNumber = user.PhoneNumber;
                 existingUser.RoleId = user.RoleId;
-                existingUser.UpdatedAt = DateTime.UtcNow;
+                existingUser.UpdatedAt = DateTime.Now;
 
                 if (!string.IsNullOrEmpty(newPassword))
                     existingUser.PasswordHash = _passwordHasher.HashPassword(existingUser, newPassword);
 
                 _context.Users.Update(existingUser);
                 await _context.SaveChangesAsync();
+
+                _auditService.Log(GetCurrentUserId(), "UPDATE", "User", $"Updated user {existingUser.Username}");
 
                 TempData["Success"] = "User updated successfully.";
                 return RedirectToAction(nameof(Details), new { id = existingUser.UserId });
@@ -198,10 +204,12 @@ namespace ITSMS.Controllers
                 return NotFound();
 
             user.IsActive = false;
-            user.UpdatedAt = DateTime.UtcNow;
+            user.UpdatedAt = DateTime.Now;
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
+
+            _auditService.Log(GetCurrentUserId(), "DEACTIVATE", "User", $"Deactivated user {user.Username}");
 
             TempData["Success"] = $"User {user.Username} has been deactivated.";
             return RedirectToAction(nameof(Index));
@@ -217,13 +225,21 @@ namespace ITSMS.Controllers
                 return NotFound();
 
             user.IsActive = true;
-            user.UpdatedAt = DateTime.UtcNow;
+            user.UpdatedAt = DateTime.Now;
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
+            _auditService.Log(GetCurrentUserId(), "REACTIVATE", "User", $"Reactivated user {user.Username}");
+
             TempData["Success"] = $"User {user.Username} has been reactivated.";
             return RedirectToAction(nameof(Index));
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            return int.TryParse(userIdClaim?.Value, out var userId) ? userId : 0;
         }
     }
 }

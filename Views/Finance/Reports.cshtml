@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "Financial Reports";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <h2>Financial Reports</h2>
+    <div>
+        <a href="@Url.Action("ExportFinanceReportPdf", "Finance")" class="btn btn-primary shadow-sm me-2" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
+        </a>
+        <a asp-action="Dashboard" class="btn btn-secondary shadow-sm">Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Expenses by Department</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="expensesByDeptChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Monthly Payroll Summary</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="payrollSummaryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Dynamic data for charts
+            const expensesLabels = @Html.Raw(ViewBag.ExpensesLabels ?? "[]");
+            const expensesData = @Html.Raw(ViewBag.ExpensesData ?? "[]");
+
+            const ctxDept = document.getElementById('expensesByDeptChart').getContext('2d');
+            new Chart(ctxDept, {
+                type: 'doughnut',
+                data: {
+                    labels: expensesLabels,
+                    datasets: [{
+                        data: expensesData,
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69']
+                    }]
+                }
+            });
+
+            const payrollLabels = @Html.Raw(ViewBag.PayrollLabels ?? "[]");
+            const payrollData = @Html.Raw(ViewBag.PayrollData ?? "[]");
+
+            const ctxPayroll = document.getElementById('payrollSummaryChart').getContext('2d');
+            new Chart(ctxPayroll, {
+                type: 'bar',
+                data: {
+                    labels: payrollLabels,
+                    datasets: [{
+                        label: 'Total Payroll (Paid)',
+                        data: payrollData,
+                        backgroundColor: '#1cc88a'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        });
+    </script>
+}

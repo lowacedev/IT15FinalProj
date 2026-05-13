@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ITSMS.Data;
 using ITSMS.Models;
 using Microsoft.EntityFrameworkCore;
+using Rotativa.AspNetCore;
 
 namespace ITSMS.Controllers
 {
@@ -45,7 +46,7 @@ namespace ITSMS.Controllers
                 {
                     Technician = t.FullName,
                     AssignedCount = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId),
-                    CompletedCount = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId && sr.Status == ServiceRequestStatus.Resolved)
+                    CompletedCount = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId && (sr.Status == ServiceRequestStatus.Resolved || sr.Status == ServiceRequestStatus.Closed))
                 })
                 .OrderByDescending(x => x.AssignedCount)
                 .Take(5)
@@ -251,7 +252,7 @@ namespace ITSMS.Controllers
                 {
                     Technician = t.FullName,
                     AssignedCount = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId),
-                    CompletedCount = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId && sr.Status == ServiceRequestStatus.Resolved)
+                    CompletedCount = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId && (sr.Status == ServiceRequestStatus.Resolved || sr.Status == ServiceRequestStatus.Closed))
                 })
                 .OrderByDescending(x => x.AssignedCount)
                 .Take(5)
@@ -401,6 +402,49 @@ namespace ITSMS.Controllers
             return View(viewModel);
         }
 
+        // GET: Reports/ExportAnalyticsPdf
+        [HttpGet]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public IActionResult ExportAnalyticsPdf()
+        {
+            var viewModel = new ReportsViewModel();
+            var allServiceRequests = _context.ServiceRequests
+                .Include(sr => sr.Category)
+                .Include(sr => sr.Requestor)
+                .Include(sr => sr.AssignedTechnician)
+                .Include(sr => sr.Asset)
+                .Include(sr => sr.Employee).ThenInclude(e => e.Department)
+                .ToList();
+
+            // Prepare essential data for PDF (Summary, Category, Priority)
+            viewModel.TotalRequests = allServiceRequests.Count;
+            viewModel.PendingRequests = allServiceRequests.Count(sr => sr.Status == ServiceRequestStatus.Pending);
+            viewModel.InProgressRequests = allServiceRequests.Count(sr => sr.Status == ServiceRequestStatus.InProgress);
+            viewModel.ResolvedRequests = allServiceRequests.Count(sr => sr.Status == ServiceRequestStatus.Resolved);
+            viewModel.ClosedRequests = allServiceRequests.Count(sr => sr.Status == ServiceRequestStatus.Closed);
+
+            viewModel.RequestsByCategory = allServiceRequests
+                .GroupBy(sr => sr.Category != null ? sr.Category.CategoryName : "Uncategorized")
+                .Select(g => new CategoryData { Category = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count).ToList();
+
+            viewModel.RequestsByPriority = allServiceRequests
+                .GroupBy(sr => sr.Priority)
+                .Select(g => new PriorityData { Priority = g.Key.ToString(), Count = g.Count() })
+                .OrderBy(x => x.Priority).ToList();
+
+            ViewData["Title"] = "Analytics & System Overview";
+            ViewData["GeneratedBy"] = User.Identity?.Name ?? "Admin User";
+            
+            return new ViewAsPdf("AnalyticsPdf", viewModel)
+            {
+                FileName = $"AnalyticsReport_{DateTime.Now:yyyyMMdd}.pdf",
+                PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,
+                PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                ViewData = this.ViewData
+            };
+        }
+
         // GET: Reports/TechnicianPerformance
         [HttpGet]
         [Authorize(Roles = "Admin,SuperAdmin")]
@@ -445,29 +489,59 @@ namespace ITSMS.Controllers
             return View(viewModel);
         }
 
+        // GET: Reports/ExportTechnicianPerformancePdf
+        [HttpGet]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public IActionResult ExportTechnicianPerformancePdf()
+        {
+            var viewModel = new ReportsViewModel();
+            var technicians = _context.Users.Where(u => u.IsActive && u.Role.RoleName == "Technician").ToList();
+            var allServiceRequests = _context.ServiceRequests.ToList();
+
+            viewModel.TechnicianPerformances = technicians.Select(t => new TechnicianPerformance
+            {
+                TechnicianName = t.FullName,
+                AssignedTickets = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId),
+                CompletedTickets = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId && (sr.Status == ServiceRequestStatus.Resolved || sr.Status == ServiceRequestStatus.Closed)),
+                InProgressTickets = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId && sr.Status == ServiceRequestStatus.InProgress),
+                PendingTickets = allServiceRequests.Count(sr => sr.AssignedTechnicianId == t.UserId && sr.Status == ServiceRequestStatus.Pending)
+            }).OrderByDescending(x => x.AssignedTickets).ToList();
+
+            ViewData["Title"] = "Technician Performance Report";
+            ViewData["GeneratedBy"] = User.Identity?.Name ?? "Admin User";
+
+            return new ViewAsPdf("TechnicianPerformancePdf", viewModel)
+            {
+                FileName = $"TechnicianPerformance_{DateTime.Now:yyyyMMdd}.pdf",
+                PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,
+                PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                ViewData = this.ViewData
+            };
+        }
+
         // GET: Reports/ServiceRequestsDetails
         [HttpGet]
         [Authorize(Roles = "Admin,SuperAdmin")]
-        public IActionResult ServiceRequestsDetails(string status = "", string priority = "", string search = "")
+        public IActionResult ServiceRequestsDetails(string status = "", string priority = "", string search = "", int page = 1, int pageSize = 10)
         {
             var viewModel = new ReportsViewModel();
+            viewModel.CurrentPage = page;
+            viewModel.PageSize = pageSize;
 
-            // Get all service requests with related data
-            var allRequests = _context.ServiceRequests
+            // Get queryable for service requests with related data
+            var query = _context.ServiceRequests
                 .Include(sr => sr.Category)
                 .Include(sr => sr.Requestor)
                 .Include(sr => sr.AssignedTechnician)
-                .ToList();
+                .AsQueryable();
 
             // ===== APPLY FILTERS =====
-            var filteredRequests = allRequests;
-
             // Filter by Status
             if (!string.IsNullOrEmpty(status))
             {
                 if (Enum.TryParse<ServiceRequestStatus>(status, out var statusEnum))
                 {
-                    filteredRequests = filteredRequests.Where(sr => sr.Status == statusEnum).ToList();
+                    query = query.Where(sr => sr.Status == statusEnum);
                 }
                 viewModel.SelectedStatus = status;
             }
@@ -477,7 +551,7 @@ namespace ITSMS.Controllers
             {
                 if (Enum.TryParse<ServiceRequestPriority>(priority, out var priorityEnum))
                 {
-                    filteredRequests = filteredRequests.Where(sr => sr.Priority == priorityEnum).ToList();
+                    query = query.Where(sr => sr.Priority == priorityEnum);
                 }
                 viewModel.SelectedPriority = priority;
             }
@@ -486,12 +560,25 @@ namespace ITSMS.Controllers
             if (!string.IsNullOrEmpty(search))
             {
                 var searchLower = search.ToLower();
-                filteredRequests = filteredRequests
-                    .Where(sr => sr.Title.ToLower().Contains(searchLower) || 
-                                 (sr.Requestor != null && sr.Requestor.FullName.ToLower().Contains(searchLower)))
-                    .ToList();
+                query = query.Where(sr => sr.Title.ToLower().Contains(searchLower) || 
+                                         (sr.Requestor != null && sr.Requestor.FullName.ToLower().Contains(searchLower)));
                 viewModel.SearchQuery = search;
             }
+
+            // ===== CALCULATE PAGINATION =====
+            viewModel.TotalCount = query.Count();
+            viewModel.TotalPages = (int)Math.Ceiling(viewModel.TotalCount / (double)pageSize);
+
+            if (page < 1) page = 1;
+            if (page > viewModel.TotalPages && viewModel.TotalPages > 0) page = viewModel.TotalPages;
+            viewModel.CurrentPage = page;
+
+            // Apply ordering and pagination
+            var filteredRequests = query
+                .OrderByDescending(sr => sr.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             // ===== MAP TO DETAIL VIEW MODEL =====
             viewModel.ServiceRequestDetails = filteredRequests
@@ -512,10 +599,10 @@ namespace ITSMS.Controllers
                     ResolvedAt = sr.ResolvedAt,
                     ClosedAt = sr.ClosedAt
                 })
-                .OrderByDescending(x => x.CreatedAt)
                 .ToList();
 
-            // ===== SUMMARY STATISTICS =====
+            // ===== SUMMARY STATISTICS ===== (Based on all requests)
+            var allRequests = _context.ServiceRequests.ToList();
             viewModel.TotalRequests = allRequests.Count;
             viewModel.PendingRequests = allRequests.Count(sr => sr.Status == ServiceRequestStatus.Pending);
             viewModel.InProgressRequests = allRequests.Count(sr => sr.Status == ServiceRequestStatus.InProgress);
@@ -524,6 +611,59 @@ namespace ITSMS.Controllers
             viewModel.CriticalRequests = allRequests.Count(sr => sr.Priority == ServiceRequestPriority.Critical && sr.Status != ServiceRequestStatus.Closed);
 
             return View(viewModel);
+        }
+
+        // GET: Reports/ExportDetailedRequestsPdf
+        [HttpGet]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public IActionResult ExportDetailedRequestsPdf(string status = "", string priority = "", string search = "")
+        {
+            var query = _context.ServiceRequests
+                .Include(sr => sr.Category)
+                .Include(sr => sr.Requestor)
+                .Include(sr => sr.AssignedTechnician)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<ServiceRequestStatus>(status, out var statusEnum))
+                query = query.Where(sr => sr.Status == statusEnum);
+
+            if (!string.IsNullOrEmpty(priority) && Enum.TryParse<ServiceRequestPriority>(priority, out var priorityEnum))
+                query = query.Where(sr => sr.Priority == priorityEnum);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(sr => sr.Title.ToLower().Contains(searchLower) || 
+                                         (sr.Requestor != null && sr.Requestor.FullName.ToLower().Contains(searchLower)));
+            }
+
+            var requests = query.OrderByDescending(sr => sr.CreatedAt).ToList();
+
+            var viewModel = new ReportsViewModel
+            {
+                ServiceRequestDetails = requests.Select(sr => new ServiceRequestDetail
+                {
+                    RequestNumber = sr.RequestNumber,
+                    Title = sr.Title,
+                    Category = sr.Category?.CategoryName ?? "Uncategorized",
+                    Requestor = sr.Requestor?.FullName ?? "N/A",
+                    AssignedTechnician = sr.AssignedTechnician?.FullName ?? "Unassigned",
+                    Status = sr.Status.ToString(),
+                    Priority = sr.Priority.ToString(),
+                    CreatedAt = sr.CreatedAt
+                }).ToList()
+            };
+
+            ViewData["Title"] = "Detailed Service Requests";
+            ViewData["GeneratedBy"] = User.Identity?.Name ?? "Admin User";
+
+            return new ViewAsPdf("DetailedRequestsPdf", viewModel)
+            {
+                FileName = $"ServiceRequests_{DateTime.Now:yyyyMMdd}.pdf",
+                PageOrientation = Rotativa.AspNetCore.Options.Orientation.Landscape,
+                PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                ViewData = this.ViewData
+            };
         }
 
         // ==================== HELPER METHODS ====================

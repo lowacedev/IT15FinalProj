@@ -19,7 +19,7 @@ namespace ITSMS.Models
         [Required]
         [DataType(DataType.Date)]
         [Display(Name = "Assigned Date")]
-        public DateTime AssignedDate { get; set; } = DateTime.UtcNow;
+        public DateTime AssignedDate { get; set; } = DateTime.Now;
 
         [DataType(DataType.Date)]
         [Display(Name = "Returned Date")]

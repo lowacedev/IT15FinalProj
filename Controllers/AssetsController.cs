@@ -11,10 +11,12 @@ namespace ITSMS.Controllers
     public class AssetsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ITSMS.Services.AuditService _auditService;
 
-        public AssetsController(ApplicationDbContext context)
+        public AssetsController(ApplicationDbContext context, ITSMS.Services.AuditService auditService)
         {
             _context = context;
+            _auditService = auditService;
         }
 
         // GET: Assets
@@ -192,7 +194,7 @@ namespace ITSMS.Controllers
             var assignment = new AssetAssignment
             {
                 AssetId = asset.Id,
-                AssignedDate = DateTime.UtcNow
+                AssignedDate = DateTime.Now
             };
             
             ViewBag.Asset = asset;
@@ -208,6 +210,11 @@ namespace ITSMS.Controllers
             {
                 _context.Add(assignment);
                 await _context.SaveChangesAsync();
+
+                var assetLog = await _context.Assets.FindAsync(assignment.AssetId);
+                var userId = GetCurrentUserId();
+                _auditService.Log(userId, "ASSIGN", "Asset", $"Assigned {assetLog.AssetTag} to Employee #{assignment.EmployeeId}");
+
                 return RedirectToAction(nameof(Details), new { id = assignment.AssetId });
             }
             
@@ -232,7 +239,7 @@ namespace ITSMS.Controllers
 
             if (assignment != null)
             {
-                assignment.ReturnedDate = DateTime.UtcNow;
+                assignment.ReturnedDate = DateTime.Now;
                 _context.Update(assignment);
                 await _context.SaveChangesAsync();
             }
@@ -240,9 +247,45 @@ namespace ITSMS.Controllers
             return RedirectToAction(nameof(Details), new { id = assignment?.AssetId });
         }
 
+        // POST: Assets/LogCost
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogCost(int assetId, decimal amount, FinanceTransactionType transactionType, string description)
+        {
+            var asset = await _context.Assets.FindAsync(assetId);
+            if (asset == null)
+            {
+                return NotFound();
+            }
+
+            var userId = GetCurrentUserId();
+
+            var transaction = new FinanceTransaction
+            {
+                AssetId = assetId,
+                Amount = amount,
+                TransactionType = transactionType,
+                Description = description,
+                TransactionDate = DateTime.Now,
+                CreatedByUserId = userId
+            };
+
+            _context.FinanceTransactions.Add(transaction);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Maintenance cost logged successfully to Finance.";
+            return RedirectToAction(nameof(Details), new { id = assetId });
+        }
+
         private bool AssetExists(int id)
         {
             return _context.Assets.Any(e => e.Id == id);
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            return int.TryParse(userIdClaim?.Value, out var userId) ? userId : 0;
         }
     }
 }

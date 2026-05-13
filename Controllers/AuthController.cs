@@ -6,6 +6,12 @@ using ITSMS.Data;
 using ITSMS.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ITSMS.Controllers
 {
@@ -17,10 +23,12 @@ namespace ITSMS.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly PasswordHasher<User> _passwordHasher;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(ApplicationDbContext context)
+        public AuthController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
             _passwordHasher = new PasswordHasher<User>();
         }
 
@@ -59,6 +67,41 @@ namespace ITSMS.Controllers
                 ModelState.AddModelError("", "Username and password are required.");
                 return View();
             }
+
+            // ======================== reCAPTCHA VALIDATION ========================
+            var captchaResponse = Request.Form["g-recaptcha-response"];
+            if (string.IsNullOrEmpty(captchaResponse))
+            {
+                ModelState.AddModelError("", "Please complete the CAPTCHA verification.");
+                return View();
+            }
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(10); // Don't hang forever
+                    var secret = _configuration["GoogleReCaptcha:SecretKey"];
+                    var verificationUrl = $"https://www.google.com/recaptcha/api/siteverify?secret={secret}&response={captchaResponse}";
+                    
+                    var response = await client.PostAsync(verificationUrl, null);
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    var captchaResult = JsonSerializer.Deserialize<ReCaptchaResponse>(jsonString);
+
+                    if (captchaResult == null || !captchaResult.Success)
+                    {
+                        ModelState.AddModelError("", "CAPTCHA validation failed. Please try again.");
+                        return View();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error if you have a logger, otherwise show generic message
+                ModelState.AddModelError("", "Unable to verify CAPTCHA at this time. Please try again later.");
+                return View();
+            }
+            // ======================================================================
 
             var user = _context.Users
                 .Include(u => u.Role)

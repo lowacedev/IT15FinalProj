@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using ITSMS.Data;
 
@@ -28,6 +29,15 @@ if (File.Exists(envPath))
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ==================== DATA PROTECTION (Key Persistence) ====================
+// Persist Data Protection keys so anti-forgery tokens and auth cookies
+// survive app pool recycles on shared hosting (e.g. MonsterASP)
+var keysDir = Path.Combine(builder.Environment.ContentRootPath, "keys");
+Directory.CreateDirectory(keysDir);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysDir))
+    .SetApplicationName("ITSMS");
+
 // ==================== SERVICES REGISTRATION ====================
 
 // Add DbContext with MySQL support (Pomelo)
@@ -37,7 +47,17 @@ var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "itsms";
 var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "root";
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
 
+// Prefer environment variables (from .env) for local development if DB_SERVER is explicitly set
 var connectionString = $"server={dbServer};port={dbPort};database={dbName};uid={dbUser};pwd={dbPassword};";
+
+if (Environment.GetEnvironmentVariable("DB_SERVER") == null)
+{
+    var configConnString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (!string.IsNullOrEmpty(configConnString))
+    {
+        connectionString = configConnString;
+    }
+}
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(
@@ -47,9 +67,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 // Add Authentication (Cookie-based)
-var cookieSecurePolicy = builder.Environment.IsDevelopment() 
-    ? CookieSecurePolicy.SameAsRequest 
-    : CookieSecurePolicy.Always;
+var cookieSecurePolicy = CookieSecurePolicy.SameAsRequest;
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
@@ -63,7 +81,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         // Security settings
         options.Cookie.HttpOnly = true; // Prevent JavaScript access
         options.Cookie.SecurePolicy = cookieSecurePolicy; // HTTP only in dev, HTTPS in prod
-        options.Cookie.SameSite = SameSiteMode.Strict; // CSRF protection
+        options.Cookie.SameSite = SameSiteMode.Lax; // More compatible than Strict for some hosting environments
         options.Cookie.Name = "ITSMS.Auth";
     });
 
@@ -82,6 +100,14 @@ builder.Services.AddSession(options =>
 // Add MVC Controllers and Views
 builder.Services.AddControllersWithViews();
 
+// Add SignalR
+builder.Services.AddSignalR();
+
+// Register Custom Services
+builder.Services.AddScoped<ITSMS.Services.NotificationService>();
+builder.Services.AddScoped<ITSMS.Services.TicketCommentService>();
+builder.Services.AddScoped<ITSMS.Services.AuditService>();
+
 // Add CORS (if needed for API endpoints)
 builder.Services.AddCors(options =>
 {
@@ -96,13 +122,25 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// ==================== ROTATIVA CONFIGURATION ====================
+Rotativa.AspNetCore.RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
+
+// ==================== SET LOCALIZATION (PHP CURRENCY) ====================
+var cultureInfo = new System.Globalization.CultureInfo("en-PH");
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(cultureInfo),
+    SupportedCultures = new[] { cultureInfo },
+    SupportedUICultures = new[] { cultureInfo }
+});
+
 // ==================== MIDDLEWARE CONFIGURATION ====================
 
 // Handle errors in development
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts(); // HTTP Strict Transport Security
+    // app.UseHsts(); // Disabled for HTTP-only hosting
 }
 else
 {
@@ -111,10 +149,10 @@ else
 }
 
 // Force HTTPS only in production
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+// if (!app.Environment.IsDevelopment())
+// {
+//     app.UseHttpsRedirection();
+// }
 
 // Serve static files
 app.UseStaticFiles();
@@ -141,6 +179,8 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
+
+app.MapHub<ITSMS.Hubs.NotificationHub>("/notificationHub");
 
 // ==================== DATABASE INITIALIZATION ====================
 

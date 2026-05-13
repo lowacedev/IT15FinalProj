@@ -153,10 +153,10 @@
         font-weight: 600;
     }
 
-    .priority-high { background: #fee2e2; color: #991b1b; }
-    .priority-medium { background: #fef3c7; color: #92400e; }
-    .priority-low { background: #dbeafe; color: #003da5; }
-    .priority-critical { background: #fecaca; color: #7f1d1d; }
+    .priority-high { color: #991b1b; }
+    .priority-medium { color: #92400e; }
+    .priority-low { color: #003da5; }
+    .priority-critical { color: #7f1d1d; }
 
     .stat-open { color: #3b82f6; }
     .stat-progress { color: #f59e0b; }
@@ -250,7 +250,7 @@
         }
 
         .kpi-value {
-            text-align: left;
+            text-align: right;
             width: 100%;
         }
     }
@@ -364,12 +364,12 @@
                                                     @{
                                                         var statusClass = request.Status switch
                                                         {
-                                                            ServiceRequestStatus.Pending => "bg-info",
-                                                            ServiceRequestStatus.InProgress => "bg-warning text-dark",
-                                                            ServiceRequestStatus.OnHold => "bg-secondary",
-                                                            ServiceRequestStatus.Resolved => "bg-success",
-                                                            ServiceRequestStatus.Closed => "bg-dark",
-                                                            _ => "bg-light text-dark"
+                                                            ServiceRequestStatus.Pending => "text-info",
+                                                            ServiceRequestStatus.InProgress => "text-warning",
+                                                            ServiceRequestStatus.OnHold => "text-secondary",
+                                                            ServiceRequestStatus.Resolved => "text-success",
+                                                            ServiceRequestStatus.Closed => "text-dark",
+                                                            _ => "text-dark"
                                                         };
                                                     }
                                                     <span class="badge @statusClass">@request.Status</span>
@@ -687,18 +687,18 @@
 
     function getStatusClass(status) {
         const statusMap = {
-            'Pending': 'bg-info',
-            'InProgress': 'bg-warning text-dark',
-            'In Progress': 'bg-warning text-dark',
-            'OnHold': 'bg-secondary',
-            'On Hold': 'bg-secondary',
-            'Resolved': 'bg-success',
-            'Closed': 'bg-dark',
-            0: 'bg-info',
-            1: 'bg-warning text-dark',
-            2: 'bg-secondary',
-            3: 'bg-success',
-            4: 'bg-dark'
+            'Pending': 'text-info',
+            'InProgress': 'text-warning',
+            'In Progress': 'text-warning',
+            'OnHold': 'text-secondary',
+            'On Hold': 'text-secondary',
+            'Resolved': 'text-success',
+            'Closed': 'text-dark',
+            0: 'text-info',
+            1: 'text-warning',
+            2: 'text-secondary',
+            3: 'text-success',
+            4: 'text-dark'
         };
         return statusMap[status] || 'bg-light text-dark';
     }

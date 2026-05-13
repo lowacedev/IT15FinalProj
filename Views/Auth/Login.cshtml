@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     ViewData["Title"] = "Login - IT Service Management System";
     Layout = null;
@@ -190,7 +191,14 @@
             font-size: 12px;
             margin-top: 4px;
         }
+
+        .g-recaptcha {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
     </style>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 <div class="login-container">
@@ -250,6 +258,10 @@
                        required 
                        placeholder="Enter your password"
                        autocomplete="current-password" />
+            </div>
+
+            <div class="form-group text-center">
+                <div class="g-recaptcha" data-sitekey="@Configuration["GoogleReCaptcha:SiteKey"]"></div>
             </div>
 
             <button type="submit" class="btn-login" id="loginBtn">

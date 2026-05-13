@@ -1,135 +1,362 @@
 @{
     ViewData["Title"] = "Technician Dashboard";
-    var pendingCount = ViewData["PendingCount"] != null ? (int)ViewData["PendingCount"] : 0;
+    var assignedCount = ViewData["AssignedCount"] != null ? (int)ViewData["AssignedCount"] : 0;
     var ongoingCount = ViewData["OngoingCount"] != null ? (int)ViewData["OngoingCount"] : 0;
     var completedCount = ViewData["CompletedCount"] != null ? (int)ViewData["CompletedCount"] : 0;
+    var assignedRequests = ViewData["AssignedRequests"] as List<ITSMS.Models.ServiceRequest> ?? new List<ITSMS.Models.ServiceRequest>();
+    var recentFeedbacks = ViewData["RecentFeedbacks"] as List<ITSMS.Models.Feedback> ?? new List<ITSMS.Models.Feedback>();
 }
 
-<div class="container-fluid mt-4">
-    <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2 class="mb-2" style="color: #2c3e50;">
-                <i class="bi bi-speedometer2"></i> Technician Dashboard
-            </h2>
-            <p class="text-muted">Overview of your assigned tasks and service requests</p>
-        </div>
-    </div>
-
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <!-- Pending Assigned Card -->
-        <div class="col-md-4 mb-3">
-            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-muted mb-2">Pending Assigned</h6>
-                            <h3 class="mb-0" style="color: #ffc107;">@pendingCount</h3>
-                        </div>
-                        <div style="font-size: 2.5rem; color: #ffc107; opacity: 0.3;">
-                            <i class="bi bi-hourglass-split"></i>
-                        </div>
-                    </div>
-                    <small class="text-muted d-block mt-2">New/Open requests assigned to you</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ongoing Tasks Card -->
-        <div class="col-md-4 mb-3">
-            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0d6efd;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-muted mb-2">Ongoing Tasks</h6>
-                            <h3 class="mb-0" style="color: #0d6efd;">@ongoingCount</h3>
-                        </div>
-                        <div style="font-size: 2.5rem; color: #0d6efd; opacity: 0.3;">
-                            <i class="bi bi-play-circle"></i>
-                        </div>
-                    </div>
-                    <small class="text-muted d-block mt-2">Tasks currently in progress</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Completed Tasks Card -->
-        <div class="col-md-4 mb-3">
-            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #198754;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-muted mb-2">Completed Tasks</h6>
-                            <h3 class="mb-0" style="color: #198754;">@completedCount</h3>
-                        </div>
-                        <div style="font-size: 2.5rem; color: #198754; opacity: 0.3;">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                    </div>
-                    <small class="text-muted d-block mt-2">Resolved or closed requests</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Message -->
-    @if (TempData["success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle"></i> @TempData["success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+<style>
+    .dashboard-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 2rem;
     }
 
-    <!-- Quick Action Button -->
-    <div class="card border-0 shadow-sm bg-light">
-        <div class="card-body text-center py-4">
-            <a href="@Url.Action("Index", "ServiceRequests")" class="btn btn-primary btn-lg">
-                <i class="bi bi-list-task"></i> View All Assignments
-            </a>
-            <p class="text-muted mt-3 mb-0">
-                Go to the assignments page for a complete list and detailed management of all your service requests
-            </p>
-        </div>
-    </div>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-    <!-- Quick Stats Footer -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card bg-light border-0">
-                <div class="card-body small text-muted">
-                    <i class="bi bi-info-circle"></i>
-                    <strong>Dashboard Tips:</strong>
-                    Use this dashboard to get a quick overview of your workload. Click "View All Assignments" to see your complete task list, manage assignments, and update status on individual requests.
+    .dashboard-header h1 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 2.5rem;
+    }
+
+    .dashboard-header p {
+        opacity: 0.95;
+        margin: 0;
+    }
+
+    .kpi-card {
+        background: white;
+        border: none;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .kpi-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .kpi-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1;
+    }
+
+    .kpi-icon {
+        font-size: 2rem;
+        margin-bottom: 0.25rem;
+        opacity: 0.8;
+    }
+
+    .kpi-icon.primary { color: #667eea; }
+    .kpi-icon.warning { color: #f59e0b; }
+    .kpi-icon.success { color: #10b981; }
+
+    .kpi-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1;
+        text-align: right;
+        min-width: 80px;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-header i {
+        font-size: 1.25rem;
+    }
+
+    .section-body {
+        padding: 1.5rem;
+    }
+
+    .recent-table {
+        font-size: 0.9rem;
+    }
+
+    .recent-table th {
+        background: #f3f4f6;
+        font-weight: 600;
+        color: #374151;
+        border: none;
+    }
+
+    .recent-table td {
+        vertical-align: middle;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        font-weight: 600;
+    }
+
+    .priority-high { color: #991b1b; }
+    .priority-medium { color: #92400e; }
+    .priority-low { color: #003da5; }
+    .priority-critical { color: #7f1d1d; }
+
+    .stat-progress { color: #f59e0b; }
+    .stat-resolved { color: #10b981; }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #9ca3af;
+    }
+
+    .feedback-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .feedback-item:last-child {
+        border-bottom: none;
+    }
+
+    .feedback-rating i {
+        font-size: 0.875rem;
+    }
+
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1><i class="bi bi-speedometer2"></i> Technician Dashboard</h1>
+            <p>Overview of your assigned tasks, progress, and recent feedback.</p>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- KPI Cards Row -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="kpi-card" style="animation: fadeInUp 0.6s ease 0s both;">
+                    <div class="kpi-content">
+                        <div class="kpi-icon primary"><i class="bi bi-person-workspace"></i></div>
+                        <div class="kpi-label">Assigned to Me</div>
+                    </div>
+                    <div class="kpi-value" style="color: #667eea;">@assignedCount</div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="kpi-card" style="animation: fadeInUp 0.6s ease 0.1s both;">
+                    <div class="kpi-content">
+                        <div class="kpi-icon warning"><i class="bi bi-play-circle text-warning"></i></div>
+                        <div class="kpi-label">In Progress</div>
+                    </div>
+                    <div class="kpi-value stat-progress">@ongoingCount</div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="kpi-card" style="animation: fadeInUp 0.6s ease 0.2s both;">
+                    <div class="kpi-content">
+                        <div class="kpi-icon success"><i class="bi bi-check-circle text-success"></i></div>
+                        <div class="kpi-label">Completed Tasks</div>
+                    </div>
+                    <div class="kpi-value stat-resolved">@completedCount</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Row -->
+        <div class="row mb-4">
+            <!-- Left Column: Assigned Requests Table -->
+            <div class="col-lg-8 mb-4">
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="bi bi-list-task"></i> My Assigned Requests
+                    </div>
+                    <div class="section-body">
+                        @if (assignedRequests.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover recent-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Request #</th>
+                                            <th>Title</th>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>Requestor</th>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var request in assignedRequests)
+                                        {
+                                            <tr>
+                                                <td><strong>@request.RequestNumber</strong></td>
+                                                <td>
+                                                    <span class="text-truncate" title="@request.Title">
+                                                        @request.Title.Substring(0, Math.Min(25, request.Title.Length))@(request.Title.Length > 25 ? "..." : "")
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        var priorityClass = request.Priority switch
+                                                        {
+                                                            ITSMS.Models.ServiceRequestPriority.Critical => "priority-critical",
+                                                            ITSMS.Models.ServiceRequestPriority.High => "priority-high",
+                                                            ITSMS.Models.ServiceRequestPriority.Medium => "priority-medium",
+                                                            _ => "priority-low"
+                                                        };
+                                                    }
+                                                    <span class="badge status-badge @priorityClass">@request.Priority</span>
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        var statusClass = request.Status switch
+                                                        {
+                                                            ITSMS.Models.ServiceRequestStatus.Pending => "text-info",
+                                                            ITSMS.Models.ServiceRequestStatus.InProgress => "text-warning",
+                                                            ITSMS.Models.ServiceRequestStatus.OnHold => "text-secondary",
+                                                            ITSMS.Models.ServiceRequestStatus.Resolved => "text-success",
+                                                            ITSMS.Models.ServiceRequestStatus.Closed => "text-dark",
+                                                            _ => "text-dark"
+                                                        };
+                                                    }
+                                                    <span class="badge @statusClass">@request.Status</span>
+                                                </td>
+                                                <td>@request.Requestor?.FullName</td>
+                                                <td><small>@request.CreatedAt.ToString("MMM dd, yyyy")</small></td>
+                                                <td>
+                                                    <a href="@Url.Action("Details", "ServiceRequests", new { id = request.RequestId })" 
+                                                       class="btn btn-sm btn-outline-primary" title="View/Update Details">
+                                                        <i class="bi bi-arrow-right-circle"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="bi bi-check2-circle text-success" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                                <h5>You're all caught up!</h5>
+                                <p>No service requests are currently assigned to you.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Recent Feedback -->
+            <div class="col-lg-4 mb-4">
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="bi bi-star"></i> Recent Feedback
+                    </div>
+                    <div class="section-body">
+                        @if (recentFeedbacks.Any())
+                        {
+                            foreach (var feedback in recentFeedbacks)
+                            {
+                                <div class="feedback-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-primary">@feedback.Request?.RequestNumber</strong>
+                                        <div class="feedback-rating">
+                                            @for (int i = 0; i < feedback.Rating; i++)
+                                            {
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            }
+                                            @for (int i = feedback.Rating; i < 5; i++)
+                                            {
+                                                <i class="bi bi-star text-muted"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(feedback.Comments))
+                                    {
+                                        <p class="text-muted small mb-1" style="font-style: italic;">"@feedback.Comments"</p>
+                                    }
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> @feedback.ProvidedAt.ToString("MMM dd, yyyy")
+                                    </small>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <p class="mb-0">No feedback received yet.</p>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .card {
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: #f8f9fa;
-    }
-
-    .badge {
-        font-weight: 500;
-        padding: 0.35rem 0.65rem;
-    }
-
-    .btn-outline-primary:hover,
-    .btn-outline-success:hover {
-        transform: scale(1.05);
-        transition: all 0.2s;
-    }
-</style>
