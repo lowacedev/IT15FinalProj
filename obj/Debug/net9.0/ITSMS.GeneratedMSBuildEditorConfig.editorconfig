@@ -19,269 +19,269 @@ build_property.TargetFrameworkIdentifier = .NETCoreApp
 build_property.TargetFrameworkVersion = v9.0
 build_property.RootNamespace = ITSMS
 build_property.RootNamespace = ITSMS
-build_property.ProjectDir = C:\Users\User Laptop\IT15FinalProj-1\
+build_property.ProjectDir = c:\Users\User Laptop\IT15FinalProj-1\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\User Laptop\IT15FinalProj-1
+build_property.MSBuildProjectDirectory = c:\Users\User Laptop\IT15FinalProj-1
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Assign.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Assign.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXNzZXRzXEFzc2lnbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Create.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXNzZXRzXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Details.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXNzZXRzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Edit.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXNzZXRzXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Index.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Assets/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXNzZXRzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Assignments/Assign.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Assignments/Assign.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXNzaWdubWVudHNcQXNzaWduLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Assignments/History.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Assignments/History.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXNzaWdubWVudHNcSGlzdG9yeS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Assignments/Workload.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Assignments/Workload.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXNzaWdubWVudHNcV29ya2xvYWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/AuditLog/Index.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/AuditLog/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXVkaXRMb2dcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Auth/Login.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Auth/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Employees/Create.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Employees/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVzXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Employees/Details.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Employees/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Employees/Edit.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Employees/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVzXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Employees/Index.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Employees/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Feedback/Create.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Feedback/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmVlZGJhY2tcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Feedback/Edit.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Feedback/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmVlZGJhY2tcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Feedback/Statistics.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Feedback/Statistics.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmVlZGJhY2tcU3RhdGlzdGljcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Finance/Create.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Finance/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmluYW5jZVxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Finance/Dashboard.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Finance/Dashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmluYW5jZVxEYXNoYm9hcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Finance/FinanceReportPdf.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Finance/FinanceReportPdf.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmluYW5jZVxGaW5hbmNlUmVwb3J0UGRmLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Finance/Reports.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Finance/Reports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmluYW5jZVxSZXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Finance/Transactions.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Finance/Transactions.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmluYW5jZVxUcmFuc2FjdGlvbnMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Create.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5cm9sbFxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Delete.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5cm9sbFxEZWxldGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Details.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5cm9sbFxEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Edit.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5cm9sbFxFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/EmployeeHistoryPdf.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/EmployeeHistoryPdf.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5cm9sbFxFbXBsb3llZUhpc3RvcnlQZGYuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Index.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5cm9sbFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/MonthlySummaryPdf.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Payroll/MonthlySummaryPdf.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5cm9sbFxNb250aGx5U3VtbWFyeVBkZi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/Analytics.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/Analytics.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xBbmFseXRpY3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/AnalyticsPdf.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/AnalyticsPdf.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xBbmFseXRpY3NQZGYuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/CategoryAnalysis.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/CategoryAnalysis.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xDYXRlZ29yeUFuYWx5c2lzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/CustomerSatisfaction.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/CustomerSatisfaction.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xDdXN0b21lclNhdGlzZmFjdGlvbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/Dashboard.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/Dashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xEYXNoYm9hcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/DetailedRequestsPdf.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/DetailedRequestsPdf.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xEZXRhaWxlZFJlcXVlc3RzUGRmLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/PriorityAnalysis.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/PriorityAnalysis.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xQcmlvcml0eUFuYWx5c2lzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/ServiceRequestsDetails.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/ServiceRequestsDetails.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xTZXJ2aWNlUmVxdWVzdHNEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/TechnicianPerformance.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/TechnicianPerformance.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xUZWNobmljaWFuUGVyZm9ybWFuY2UuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/TechnicianPerformancePdf.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/TechnicianPerformancePdf.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xUZWNobmljaWFuUGVyZm9ybWFuY2VQZGYuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/TechnicianWorkload.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/TechnicianWorkload.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xUZWNobmljaWFuV29ya2xvYWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/_CriticalRequests.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/_CriticalRequests.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xfQ3JpdGljYWxSZXF1ZXN0cy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Reports/_PendingRequests.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Reports/_PendingRequests.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0c1xfUGVuZGluZ1JlcXVlc3RzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/CloseConfirm.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/CloseConfirm.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVJlcXVlc3RzXENsb3NlQ29uZmlybS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/Create.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVJlcXVlc3RzXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/Details.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVJlcXVlc3RzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/Edit.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVJlcXVlc3RzXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/Index.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVJlcXVlc3RzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/_CommentForm.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/_CommentForm.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVJlcXVlc3RzXF9Db21tZW50Rm9ybS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/_CommentThread.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/ServiceRequests/_CommentThread.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVJlcXVlc3RzXF9Db21tZW50VGhyZWFkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Shared/AccessDenied.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Shared/AccessDenied.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEFjY2Vzc0RlbmllZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Shared/Error.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Shared/_PdfLayout.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Shared/_PdfLayout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9QZGZMYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Shared/_ValidationScriptsPartial.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/TechnicianDashboard/Index.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/TechnicianDashboard/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVjaG5pY2lhbkRhc2hib2FyZFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/TechnicianDashboard/UpdateStatus.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/TechnicianDashboard/UpdateStatus.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVjaG5pY2lhbkRhc2hib2FyZFxVcGRhdGVTdGF0dXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Users/Create.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Users/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Users/Deactivate.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Users/Deactivate.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcRGVhY3RpdmF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Users/DeactivateConfirm.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Users/DeactivateConfirm.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcRGVhY3RpdmF0ZUNvbmZpcm0uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Users/Details.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Users/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Users/Edit.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Users/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Users/Index.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Users/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/_ViewImports.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/_ViewStart.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/User Laptop/IT15FinalProj-1/Views/Shared/_Layout.cshtml]
+[c:/Users/User Laptop/IT15FinalProj-1/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-kx6t240gns

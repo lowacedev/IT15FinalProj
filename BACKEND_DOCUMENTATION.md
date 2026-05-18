@@ -1056,7 +1056,7 @@ var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
 #### **Implementation:**
 ```csharp
-// AuthController.cs - Line 27: Initialize PasswordHasher
+
 private readonly PasswordHasher<User> _passwordHasher;
 
 public AuthController(ApplicationDbContext context, IConfiguration configuration)
@@ -1066,12 +1066,11 @@ public AuthController(ApplicationDbContext context, IConfiguration configuration
     _passwordHasher = new PasswordHasher<User>();
 }
 
-// AuthController.cs - Line 109: Verify password on login
+
 var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
 if (result != PasswordVerificationResult.Success)
     ModelState.AddModelError("", "Invalid username or password.");
 
-// AuthController.cs - Line 172: Hash password on registration
 newUser.PasswordHash = _passwordHasher.HashPassword(newUser, password);
 
 // Data/ApplicationDbContext.cs - Lines 93-100: Seed SuperAdmin with hashed password
@@ -1107,17 +1106,17 @@ AQAAAAIAAYagAAAAEP0eMDRPW7XlA...
 
 #### **Implementation:**
 ```csharp
-// AuthController.cs - Line 57: Validate token on Login POST
+
 [HttpPost]
 [ValidateAntiForgeryToken]
 public async Task<IActionResult> Login(string username, string password, string returnUrl = null)
 
-// AuthController.cs - Line 147: Validate token on Register POST
+
 [HttpPost]
 [ValidateAntiForgeryToken]
 public async Task<IActionResult> Register(...)
 
-// ServiceRequestsController.cs - Line 129: Validate token on Create POST
+
 [HttpPost("Create")]
 [ValidateAntiForgeryToken]
 [Authorize(Roles = "Employee,Admin")]

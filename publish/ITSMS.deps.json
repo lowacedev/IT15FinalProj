@@ -11,7 +11,8 @@
           "Microsoft.AspNetCore.SignalR": "1.2.9",
           "Microsoft.EntityFrameworkCore": "9.0.0",
           "Microsoft.EntityFrameworkCore.Design": "9.0.0",
-          "Pomelo.EntityFrameworkCore.MySql": "9.0.0"
+          "Pomelo.EntityFrameworkCore.MySql": "9.0.0",
+          "Rotativa.AspNetCore": "1.4.0"
         },
         "runtime": {
           "ITSMS.dll": {}
@@ -425,6 +426,14 @@
           }
         }
       },
+      "Rotativa.AspNetCore/1.4.0": {
+        "runtime": {
+          "lib/net8.0/Rotativa.AspNetCore.dll": {
+            "assemblyVersion": "1.4.0.0",
+            "fileVersion": "1.4.0.0"
+          }
+        }
+      },
       "System.CodeDom/6.0.0": {
         "runtime": {
           "lib/net6.0/System.CodeDom.dll": {
@@ -655,6 +664,13 @@
       "sha512": "sha512-cl7S4s6CbJno0LjNxrBHNc2xxmCliR5i40ATPZk/eTywVaAbHCbdc9vbGc3QThvwGjHqrDHT8vY9m1VF/47o0g==",
       "path": "pomelo.entityframeworkcore.mysql/9.0.0",
       "hashPath": "pomelo.entityframeworkcore.mysql.9.0.0.nupkg.sha512"
+    },
+    "Rotativa.AspNetCore/1.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zn0KgqCQqiTuNPYgeqrIJxXafjJUfDJBcUJIhAV5NgWSCX3DOEeg339zMJTbzcCyoJgGPL5LrG+IKZ3k8/Uk9Q==",
+      "path": "rotativa.aspnetcore/1.4.0",
+      "hashPath": "rotativa.aspnetcore.1.4.0.nupkg.sha512"
     },
     "System.CodeDom/6.0.0": {
       "type": "package",
